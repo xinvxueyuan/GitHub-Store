@@ -235,6 +235,7 @@ class SearchViewModel(
                         searchPlatform = _state.value.selectedSearchPlatform,
                         language = _state.value.selectedLanguage,
                         sortBy = _state.value.selectedSortBy,
+                        sortOrder = _state.value.selectedSortOrder,
                         page = currentPage
                     )
                     .collect { paginatedRepos ->
@@ -444,6 +445,23 @@ class SearchViewModel(
                     currentPage = 1
                     searchDebounceJob?.cancel()
                     performSearch(isInitial = true)
+                }
+            }
+
+            is SearchAction.OnSortOrderSelected -> {
+                if (_state.value.selectedSortOrder != action.sortOrder) {
+                    _state.update {
+                        it.copy(selectedSortOrder = action.sortOrder)
+                    }
+                    currentPage = 1
+                    searchDebounceJob?.cancel()
+                    performSearch(isInitial = true)
+                }
+            }
+
+            SearchAction.OnToggleSortByDialogVisibility -> {
+                _state.update {
+                    it.copy(isSortByDialogVisible = !it.isSortByDialogVisible)
                 }
             }
 

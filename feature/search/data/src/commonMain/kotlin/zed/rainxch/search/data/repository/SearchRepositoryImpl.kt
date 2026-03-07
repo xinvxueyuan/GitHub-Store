@@ -30,6 +30,7 @@ import zed.rainxch.core.domain.model.RateLimitException
 import zed.rainxch.domain.model.ProgrammingLanguage
 import zed.rainxch.domain.model.SearchPlatform
 import zed.rainxch.domain.model.SortBy
+import zed.rainxch.domain.model.SortOrder
 import zed.rainxch.domain.repository.SearchRepository
 import zed.rainxch.search.data.dto.GithubReleaseNetworkModel
 import zed.rainxch.search.data.utils.LruCache
@@ -53,10 +54,11 @@ class SearchRepositoryImpl(
         platform: SearchPlatform,
         language: ProgrammingLanguage,
         sortBy: SortBy,
+        sortOrder: SortOrder,
         page: Int
     ): String {
         val queryHash = query.trim().lowercase().hashCode().toUInt().toString(16)
-        return "search:$queryHash:${platform.name}:${language.name}:${sortBy.name}:page$page"
+        return "search:$queryHash:${platform.name}:${language.name}:${sortBy.name}:${sortOrder.name}:page$page"
     }
 
     override fun searchRepositories(
@@ -64,9 +66,10 @@ class SearchRepositoryImpl(
         searchPlatform: SearchPlatform,
         language: ProgrammingLanguage,
         sortBy: SortBy,
+        sortOrder: SortOrder,
         page: Int
     ): Flow<PaginatedDiscoveryRepositories> = channelFlow {
-        val cacheKey = searchCacheKey(query, searchPlatform, language, sortBy, page)
+        val cacheKey = searchCacheKey(query, searchPlatform, language, sortBy, sortOrder, page)
 
         val cached = cacheManager.get<PaginatedDiscoveryRepositories>(cacheKey)
         if (cached != null) {
@@ -75,7 +78,8 @@ class SearchRepositoryImpl(
         }
 
         val searchQuery = buildSearchQuery(query, language)
-        val (sort, order) = sortBy.toGithubParams()
+        val sort = sortBy.toGithubSortParam()
+        val order = sortOrder.toGithubParam()
 
         try {
             var currentPage = page

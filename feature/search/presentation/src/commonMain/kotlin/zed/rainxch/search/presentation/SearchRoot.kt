@@ -33,6 +33,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Link
@@ -100,7 +101,10 @@ import zed.rainxch.githubstore.core.presentation.res.open_in_app
 import zed.rainxch.githubstore.core.presentation.res.results_found
 import zed.rainxch.githubstore.core.presentation.res.retry
 import zed.rainxch.githubstore.core.presentation.res.search_repositories_hint
+import zed.rainxch.githubstore.core.presentation.res.sort_label
+import zed.rainxch.domain.model.SortBy
 import zed.rainxch.search.presentation.components.LanguageFilterBottomSheet
+import zed.rainxch.search.presentation.components.SortByBottomSheet
 import zed.rainxch.search.presentation.utils.ParsedGithubLink
 import zed.rainxch.search.presentation.utils.label
 
@@ -163,6 +167,23 @@ fun SearchRoot(
             },
             onDismissRequest = {
                 viewModel.onAction(SearchAction.OnToggleLanguageSheetVisibility)
+            }
+        )
+    }
+
+    if (state.isSortByDialogVisible) {
+        SortByBottomSheet(
+            sortByOptions = SortBy.entries,
+            selectedSortBy = state.selectedSortBy,
+            selectedSortOrder = state.selectedSortOrder,
+            onSortBySelected = { sortBy ->
+                viewModel.onAction(SearchAction.OnSortBySelected(sortBy))
+            },
+            onSortOrderSelected = { sortOrder ->
+                viewModel.onAction(SearchAction.OnSortOrderSelected(sortOrder))
+            },
+            onDismissRequest = {
+                viewModel.onAction(SearchAction.OnToggleSortByDialogVisibility)
             }
         )
     }
@@ -397,6 +418,48 @@ fun SearchScreen(
                         )
                     }
                 }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.sort_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
+                )
+
+                FilterChip(
+                    selected = state.selectedSortBy != SortBy.BestMatch,
+                    onClick = {
+                        onAction(SearchAction.OnToggleSortByDialogVisibility)
+                    },
+                    label = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Sort,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = stringResource(state.selectedSortBy.label()),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Icon(
+                                imageVector = Icons.Outlined.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                )
             }
 
             Spacer(Modifier.height(6.dp))
