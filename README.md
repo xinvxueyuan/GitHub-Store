@@ -116,16 +116,15 @@ GitHub® is a registered trademark of GitHub, Inc.
 <a href="https://f-droid.org/en/packages/zed.rainxch.githubstore/">
    <img src="https://f-droid.org/badge/get-it-on.png" height="80"/>
 </a>
+</p>
 
+<p align="center">
 <a href="https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://add/https://github.com/OpenHub-Store/GitHub-Store/">
   <img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" height="60" alt="Get it on Obtainium">
 </a>
 
-</p>
-
-<p align="center">
 <a href="https://github-store.org/app?repo=OpenHub-Store/GitHub-Store">
-  <img src="media-resources/ghs_download_badge.png" alt="Get it on GitHub Store" height="60">
+  <img src="media-resources/ghs_download_badge.png" alt="Get it on GitHub Store" height="80">
 </a>
 </p>
 
