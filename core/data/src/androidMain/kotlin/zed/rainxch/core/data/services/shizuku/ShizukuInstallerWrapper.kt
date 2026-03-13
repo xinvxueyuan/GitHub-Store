@@ -2,7 +2,9 @@ package zed.rainxch.core.data.services.shizuku
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import zed.rainxch.core.domain.model.GithubAsset
 import zed.rainxch.core.domain.model.InstallerType
 import zed.rainxch.core.domain.model.SystemArchitecture
@@ -111,22 +113,25 @@ class ShizukuInstallerWrapper(
             try {
                 val service = shizukuServiceManager.getService()
                 if (service != null) {
-                    val file = java.io.File(filePath)
-                    val pfd = android.os.ParcelFileDescriptor.open(
-                        file,
-                        android.os.ParcelFileDescriptor.MODE_READ_WRITE
-                    )
-                    pfd.use {
-                        Logger.d(TAG) { "Got Shizuku service, calling installPackage($filePath, size=${file.length()})..." }
-                        val result = service.installPackage(it, file.length())
-                        Logger.d(TAG) { "Shizuku installPackage() returned: $result" }
-                        if (result == 0) {
-                            Logger.d(TAG) { "Shizuku install SUCCEEDED for: $filePath" }
-                            return
+                    // Run the blocking AIDL call on IO dispatcher to avoid ANR
+                    val result = withContext(Dispatchers.IO) {
+                        val file = java.io.File(filePath)
+                        val pfd = android.os.ParcelFileDescriptor.open(
+                            file,
+                            android.os.ParcelFileDescriptor.MODE_READ_ONLY
+                        )
+                        pfd.use {
+                            Logger.d(TAG) { "Got Shizuku service, calling installPackage($filePath, size=${file.length()})..." }
+                            service.installPackage(it, file.length())
                         }
-                        Logger.w(TAG) { "Shizuku install FAILED with code: $result" }
-                        throw IllegalStateException("Shizuku install failed (code: $result)")
                     }
+                    Logger.d(TAG) { "Shizuku installPackage() returned: $result" }
+                    if (result == 0) {
+                        Logger.d(TAG) { "Shizuku install SUCCEEDED for: $filePath" }
+                        return
+                    }
+                    Logger.w(TAG) { "Shizuku install FAILED with code: $result" }
+                    throw IllegalStateException("Shizuku install failed (code: $result)")
                 } else {
                     Logger.w(TAG) { "Shizuku service is NULL, falling back to standard installer" }
                 }
@@ -154,14 +159,22 @@ class ShizukuInstallerWrapper(
             try {
                 val service = shizukuServiceManager.installerService
                 if (service != null) {
-                    Logger.d(TAG) { "Got cached service, calling uninstallPackage($packageName)..." }
-                    val result = service.uninstallPackage(packageName)
-                    Logger.d(TAG) { "Shizuku uninstallPackage() returned: $result" }
-                    if (result == 0) {
-                        Logger.d(TAG) { "Shizuku uninstall SUCCEEDED for: $packageName" }
-                        return
-                    }
-                    Logger.w(TAG) { "Shizuku uninstall FAILED with code: $result, falling back" }
+                    Logger.d(TAG) { "Got cached service, calling uninstallPackage($packageName) on background thread..." }
+                    // Fire on background thread — callers don't await result for standard uninstall either
+                    Thread {
+                        try {
+                            val result = service.uninstallPackage(packageName)
+                            Logger.d(TAG) { "Shizuku uninstallPackage() returned: $result" }
+                            if (result == 0) {
+                                Logger.d(TAG) { "Shizuku uninstall SUCCEEDED for: $packageName" }
+                            } else {
+                                Logger.w(TAG) { "Shizuku uninstall FAILED with code: $result" }
+                            }
+                        } catch (e: Exception) {
+                            Logger.e(TAG) { "Shizuku uninstall thread exception: ${e.message}" }
+                        }
+                    }.start()
+                    return
                 } else {
                     Logger.w(TAG) { "Cached Shizuku service is NULL, falling back" }
                 }
