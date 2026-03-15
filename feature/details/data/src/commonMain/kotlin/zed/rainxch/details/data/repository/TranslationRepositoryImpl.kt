@@ -14,11 +14,12 @@ import zed.rainxch.core.data.services.LocalizationManager
 import zed.rainxch.core.domain.model.ProxyConfig
 import zed.rainxch.details.domain.model.TranslationResult
 import zed.rainxch.details.domain.repository.TranslationRepository
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class TranslationRepositoryImpl(
     private val localizationManager: LocalizationManager,
-) : TranslationRepository,
-    AutoCloseable {
+) : TranslationRepository {
     private val httpClient: HttpClient = createPlatformHttpClient(ProxyConfig.None)
 
     private val json =
@@ -28,21 +29,26 @@ class TranslationRepositoryImpl(
         }
 
     private val cacheMutex = Mutex()
-    private val cache = LinkedHashMap<String, TranslationResult>(50, 0.75f, true)
-    private val maxCacheSize = 50
+    private val cache = LinkedHashMap<String, CachedTranslation>(MAX_CACHE_SIZE, 0.75f, true)
     private val maxChunkSize = 4500
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun translate(
         text: String,
         targetLanguage: String,
         sourceLanguage: String,
     ): TranslationResult {
-        val cacheKey = "${text.hashCode()}:$targetLanguage"
-        cacheMutex.withLock { cache[cacheKey] }?.let { return it }
+        val cacheKey = buildCacheKey(text, targetLanguage)
+
+        cacheMutex.withLock {
+            cache[cacheKey]?.let { cached ->
+                if (!cached.isExpired()) return cached.result
+                cache.remove(cacheKey)
+            }
+        }
 
         val chunks = chunkText(text)
         val translatedParts = mutableListOf<Pair<String, String>>()
-
         var detectedLang: String? = null
 
         for ((chunkText, delimiter) in chunks) {
@@ -64,16 +70,20 @@ class TranslationRepositoryImpl(
             )
 
         cacheMutex.withLock {
-            if (cache.size >= maxCacheSize) {
+            if (cache.size >= MAX_CACHE_SIZE) {
                 val firstKey = cache.keys.first()
                 cache.remove(firstKey)
             }
-            cache[cacheKey] = result
+            cache[cacheKey] = CachedTranslation(result)
         }
         return result
     }
 
     override fun getDeviceLanguageCode(): String = localizationManager.getPrimaryLanguageCode()
+
+    override fun clearCache() {
+        cache.clear()
+    }
 
     private suspend fun translateSingleChunk(
         text: String,
@@ -92,14 +102,7 @@ class TranslationRepositoryImpl(
                     parameter("q", text)
                 }.bodyAsText()
 
-        return try {
-            parseTranslationResponse(responseText)
-        } catch (_: Exception) {
-            TranslationResult(
-                translatedText = text,
-                detectedSourceLanguage = null,
-            )
-        }
+        return parseTranslationResponse(responseText)
     }
 
     private fun parseTranslationResponse(responseText: String): TranslationResult {
@@ -187,7 +190,27 @@ class TranslationRepositoryImpl(
         }
     }
 
-    override fun close() {
-        httpClient.close()
+    companion object {
+        private const val MAX_CACHE_SIZE = 50
+        private const val CACHE_TTL_MS = 30 * 60 * 1000L // 30 minutes
+
+        /**
+         * Build a stable cache key using the first/last 100 chars + length + target language.
+         * This avoids hashCode collisions while keeping the key compact.
+         */
+        private fun buildCacheKey(text: String, targetLanguage: String): String {
+            val prefix = text.take(100)
+            val suffix = text.takeLast(100)
+            return "$prefix|$suffix|${text.length}:$targetLanguage"
+        }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private class CachedTranslation(
+        val result: TranslationResult,
+        private val timestamp: Long = Clock.System.now().toEpochMilliseconds(),
+    ) {
+        fun isExpired(): Boolean =
+            Clock.System.now().toEpochMilliseconds() - timestamp > CACHE_TTL_MS
     }
 }

@@ -75,6 +75,8 @@ import zed.rainxch.details.presentation.utils.LocalTopbarLiquidState
 import zed.rainxch.githubstore.core.presentation.res.Res
 import zed.rainxch.githubstore.core.presentation.res.add_to_favourites
 import zed.rainxch.githubstore.core.presentation.res.cancel
+import zed.rainxch.githubstore.core.presentation.res.confirm_uninstall_message
+import zed.rainxch.githubstore.core.presentation.res.confirm_uninstall_title
 import zed.rainxch.githubstore.core.presentation.res.dismiss
 import zed.rainxch.githubstore.core.presentation.res.downgrade_requires_uninstall
 import zed.rainxch.githubstore.core.presentation.res.downgrade_warning_message
@@ -88,6 +90,7 @@ import zed.rainxch.githubstore.core.presentation.res.repository_not_starred
 import zed.rainxch.githubstore.core.presentation.res.repository_starred
 import zed.rainxch.githubstore.core.presentation.res.share_repository
 import zed.rainxch.githubstore.core.presentation.res.star_from_github
+import zed.rainxch.githubstore.core.presentation.res.uninstall
 import zed.rainxch.githubstore.core.presentation.res.uninstall_first
 import zed.rainxch.githubstore.core.presentation.res.unstar_from_github
 
@@ -300,6 +303,7 @@ fun DetailsScreen(
                         TranslationTarget.WhatsNew -> state.whatsNewTranslation.targetLanguageCode
                         null -> null
                     },
+                deviceLanguageCode = state.deviceLanguageCode,
                 onLanguageSelected = { language ->
                     when (state.languagePickerTarget) {
                         TranslationTarget.About -> {

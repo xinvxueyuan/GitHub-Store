@@ -1,6 +1,10 @@
 package zed.rainxch.details.presentation.components.sections
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,35 +75,34 @@ fun LazyListScope.about(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = stringResource(Res.string.about_this_app),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.liquefiable(liquidState),
-            )
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                TranslationControls(
-                    translationState = translationState,
-                    onTranslateClick = onTranslateClick,
-                    onLanguagePickerClick = onLanguagePickerClick,
-                    onToggleTranslation = onToggleTranslation,
+                Text(
+                    text = stringResource(Res.string.about_this_app),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.liquefiable(liquidState),
                 )
 
                 readmeLanguage?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.liquefiable(liquidState),
                     )
                 }
             }
+
+            TranslationControls(
+                translationState = translationState,
+                onTranslateClick = onTranslateClick,
+                onLanguagePickerClick = onLanguagePickerClick,
+                onToggleTranslation = onToggleTranslation,
+            )
         }
     }
 
@@ -113,18 +116,24 @@ fun LazyListScope.about(
                 readmeMarkdown
             }
 
-        ExpandableMarkdownContent(
-            content = displayContent,
-            isExpanded = isExpanded,
-            onToggleExpanded = onToggleExpanded,
-            imageTransformer = MarkdownImageTransformer,
-            collapsedHeight = collapsedHeight,
-            fadeColor = MaterialTheme.colorScheme.background,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .liquefiable(liquidState),
-        )
+        AnimatedContent(
+            targetState = displayContent,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = "about_content",
+        ) { content ->
+            ExpandableMarkdownContent(
+                content = content,
+                isExpanded = isExpanded,
+                onToggleExpanded = onToggleExpanded,
+                imageTransformer = MarkdownImageTransformer,
+                collapsedHeight = collapsedHeight,
+                fadeColor = MaterialTheme.colorScheme.background,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .liquefiable(liquidState),
+            )
+        }
     }
 }
 

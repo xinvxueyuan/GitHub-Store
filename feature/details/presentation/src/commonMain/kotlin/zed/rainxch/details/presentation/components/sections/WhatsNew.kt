@@ -1,6 +1,10 @@
 package zed.rainxch.details.presentation.components.sections
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -135,78 +139,84 @@ fun LazyListScope.whatsNew(
                         release.description ?: stringResource(Res.string.no_release_notes)
                     }
 
-                val collapsedHeightPx = with(density) { collapsedHeight.toPx() }
-                var contentHeightPx by remember(displayContent, collapsedHeightPx) {
-                    mutableFloatStateOf(0f)
-                }
-                val needsExpansion =
-                    remember(contentHeightPx, collapsedHeightPx) {
-                        contentHeightPx > collapsedHeightPx && collapsedHeightPx > 0f
+                AnimatedContent(
+                    targetState = displayContent,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "whats_new_content",
+                ) { content ->
+                    val collapsedHeightPx = with(density) { collapsedHeight.toPx() }
+                    var contentHeightPx by remember(content, collapsedHeightPx) {
+                        mutableFloatStateOf(0f)
                     }
-
-                Column(
-                    modifier = Modifier.animateContentSize(),
-                ) {
-                    Box {
-                        Box(
-                            modifier =
-                                if (!isExpanded && needsExpansion) {
-                                    Modifier.heightIn(max = collapsedHeight).clipToBounds()
-                                } else {
-                                    Modifier
-                                },
-                        ) {
-                            Markdown(
-                                content = displayContent,
-                                colors = colors,
-                                typography = typography,
-                                flavour = flavour,
-                                imageTransformer = MarkdownImageTransformer,
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .liquefiable(liquidState)
-                                        .onGloballyPositioned { coordinates ->
-                                            val measured = coordinates.size.height.toFloat()
-                                            if (measured > contentHeightPx) {
-                                                contentHeightPx = measured
-                                            }
-                                        },
-                            )
+                    val needsExpansion =
+                        remember(contentHeightPx, collapsedHeightPx) {
+                            contentHeightPx > collapsedHeightPx && collapsedHeightPx > 0f
                         }
 
-                        if (!isExpanded && needsExpansion) {
+                    Column(
+                        modifier = Modifier.animateContentSize(),
+                    ) {
+                        Box {
                             Box(
                                 modifier =
-                                    Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .fillMaxWidth()
-                                        .height(80.dp)
-                                        .background(
-                                            Brush.verticalGradient(
-                                                0f to cardColor.copy(alpha = 0f),
-                                                1f to cardColor,
-                                            ),
-                                        ),
-                            )
-                        }
-                    }
-
-                    if (needsExpansion) {
-                        TextButton(
-                            onClick = onToggleExpanded,
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                        ) {
-                            Text(
-                                text =
-                                    if (isExpanded) {
-                                        stringResource(Res.string.show_less)
+                                    if (!isExpanded && needsExpansion) {
+                                        Modifier.heightIn(max = collapsedHeight).clipToBounds()
                                     } else {
-                                        stringResource(Res.string.read_more)
+                                        Modifier
                                     },
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
+                            ) {
+                                Markdown(
+                                    content = content,
+                                    colors = colors,
+                                    typography = typography,
+                                    flavour = flavour,
+                                    imageTransformer = MarkdownImageTransformer,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .liquefiable(liquidState)
+                                            .onGloballyPositioned { coordinates ->
+                                                val measured = coordinates.size.height.toFloat()
+                                                if (measured > contentHeightPx) {
+                                                    contentHeightPx = measured
+                                                }
+                                            },
+                                )
+                            }
+
+                            if (!isExpanded && needsExpansion) {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .fillMaxWidth()
+                                            .height(80.dp)
+                                            .background(
+                                                Brush.verticalGradient(
+                                                    0f to cardColor.copy(alpha = 0f),
+                                                    1f to cardColor,
+                                                ),
+                                            ),
+                                )
+                            }
+                        }
+
+                        if (needsExpansion) {
+                            TextButton(
+                                onClick = onToggleExpanded,
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
+                            ) {
+                                Text(
+                                    text =
+                                        if (isExpanded) {
+                                            stringResource(Res.string.show_less)
+                                        } else {
+                                            stringResource(Res.string.read_more)
+                                        },
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
                         }
                     }
                 }

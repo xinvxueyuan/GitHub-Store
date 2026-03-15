@@ -85,6 +85,8 @@ class DetailsViewModel(
     private var hasLoadedInitialData = false
     private var currentDownloadJob: Job? = null
     private var currentAssetName: String? = null
+    private var aboutTranslationJob: Job? = null
+    private var whatsNewTranslationJob: Job? = null
 
     private var cachedDownloadAssetName: String? = null
 
@@ -725,12 +727,14 @@ class DetailsViewModel(
                 val newSelected = filtered.firstOrNull()
                 val (installable, primary) = recomputeAssetsForRelease(newSelected)
 
+                whatsNewTranslationJob?.cancel()
                 _state.update {
                     it.copy(
                         selectedReleaseCategory = newCategory,
                         selectedRelease = newSelected,
                         installableAssets = installable,
                         primaryAsset = primary,
+                        whatsNewTranslation = TranslationState(),
                     )
                 }
             }
@@ -738,6 +742,7 @@ class DetailsViewModel(
             is DetailsAction.SelectRelease -> {
                 val release = action.release
                 val (installable, primary) = recomputeAssetsForRelease(release)
+                whatsNewTranslationJob?.cancel()
 
                 _state.update {
                     it.copy(
@@ -770,7 +775,8 @@ class DetailsViewModel(
 
             is DetailsAction.TranslateAbout -> {
                 val readme = _state.value.readmeMarkdown ?: return
-                translateContent(
+                aboutTranslationJob?.cancel()
+                aboutTranslationJob = translateContent(
                     text = readme,
                     targetLanguageCode = action.targetLanguageCode,
                     updateState = { ts -> _state.update { it.copy(aboutTranslation = ts) } },
@@ -780,7 +786,8 @@ class DetailsViewModel(
 
             is DetailsAction.TranslateWhatsNew -> {
                 val description = _state.value.selectedRelease?.description ?: return
-                translateContent(
+                whatsNewTranslationJob?.cancel()
+                whatsNewTranslationJob = translateContent(
                     text = description,
                     targetLanguageCode = action.targetLanguageCode,
                     updateState = { ts -> _state.update { it.copy(whatsNewTranslation = ts) } },
@@ -1347,8 +1354,8 @@ class DetailsViewModel(
         targetLanguageCode: String,
         updateState: (TranslationState) -> Unit,
         getCurrentState: () -> TranslationState,
-    ) {
-        viewModelScope.launch {
+    ): Job {
+        return viewModelScope.launch {
             try {
                 updateState(
                     getCurrentState().copy(
@@ -1380,6 +1387,8 @@ class DetailsViewModel(
                         detectedSourceLanguage = result.detectedSourceLanguage,
                     ),
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 logger.error("Translation failed: ${e.message}")
                 updateState(
