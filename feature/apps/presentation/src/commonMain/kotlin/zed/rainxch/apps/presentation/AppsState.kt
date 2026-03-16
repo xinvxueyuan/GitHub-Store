@@ -26,6 +26,7 @@ data class AppsState(
     val repoUrl: String = "",
     val isValidatingRepo: Boolean = false,
     val repoValidationError: String? = null,
+    val linkValidationStatus: String? = null,
     val fetchedRepoInfo: GithubRepoInfo? = null,
     // Export/Import
     val isExporting: Boolean = false,

@@ -89,6 +89,7 @@ fun LinkAppBottomSheet(
                     repoUrl = state.repoUrl,
                     isValidating = state.isValidatingRepo,
                     validationError = state.repoValidationError,
+                    validationStatus = state.linkValidationStatus,
                     onUrlChanged = { onAction(AppsAction.OnRepoUrlChanged(it)) },
                     onConfirm = { onAction(AppsAction.OnValidateAndLinkRepo) },
                     onBack = { onAction(AppsAction.OnBackToAppPicker) },
@@ -239,6 +240,7 @@ private fun EnterUrlStep(
     repoUrl: String,
     isValidating: Boolean,
     validationError: String?,
+    validationStatus: String?,
     onUrlChanged: (String) -> Unit,
     onConfirm: () -> Unit,
     onBack: () -> Unit,
@@ -337,6 +339,16 @@ private fun EnterUrlStep(
                     fontWeight = FontWeight.Bold,
                 )
             }
+        }
+
+        if (isValidating && validationStatus != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = validationStatus,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

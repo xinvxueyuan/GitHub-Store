@@ -20,6 +20,7 @@ import zed.rainxch.apps.presentation.model.AppItem
 import zed.rainxch.apps.presentation.model.UpdateAllProgress
 import zed.rainxch.apps.presentation.model.UpdateState
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
+import zed.rainxch.core.domain.model.DeviceApp
 import zed.rainxch.core.domain.model.InstalledApp
 import zed.rainxch.core.domain.model.RateLimitException
 import zed.rainxch.core.domain.network.Downloader
@@ -736,6 +737,7 @@ class AppsViewModel(
                 selectedDeviceApp = null,
                 repoUrl = "",
                 repoValidationError = null,
+                linkValidationStatus = null,
                 fetchedRepoInfo = null,
                 isValidatingRepo = false,
             )
@@ -753,15 +755,36 @@ class AppsViewModel(
             }
 
         viewModelScope.launch {
-            _state.update { it.copy(isValidatingRepo = true, repoValidationError = null) }
+            _state.update {
+                it.copy(
+                    isValidatingRepo = true,
+                    repoValidationError = null,
+                    linkValidationStatus = null,
+                )
+            }
 
             try {
+                _state.update { it.copy(linkValidationStatus = getString(Res.string.validating_repo)) }
+
                 val repoInfo = appsRepository.fetchRepoInfo(owner, repo)
                 if (repoInfo == null) {
                     _state.update {
                         it.copy(
                             isValidatingRepo = false,
+                            linkValidationStatus = null,
                             repoValidationError = "Repository not found: $owner/$repo",
+                        )
+                    }
+                    return@launch
+                }
+
+                val validationError = validateSigningFingerprint(selectedApp, owner, repo)
+                if (validationError != null) {
+                    _state.update {
+                        it.copy(
+                            isValidatingRepo = false,
+                            linkValidationStatus = null,
+                            repoValidationError = validationError,
                         )
                     }
                     return@launch
@@ -772,6 +795,7 @@ class AppsViewModel(
                 _state.update {
                     it.copy(
                         isValidatingRepo = false,
+                        linkValidationStatus = null,
                         showLinkSheet = false,
                     )
                 }
@@ -782,6 +806,7 @@ class AppsViewModel(
                 _state.update {
                     it.copy(
                         isValidatingRepo = false,
+                        linkValidationStatus = null,
                         repoValidationError = "GitHub API rate limit exceeded. Try again later.",
                     )
                 }
@@ -790,10 +815,72 @@ class AppsViewModel(
                 _state.update {
                     it.copy(
                         isValidatingRepo = false,
+                        linkValidationStatus = null,
                         repoValidationError = "Failed to link: ${e.message}",
                     )
                 }
             }
+        }
+    }
+
+    private suspend fun validateSigningFingerprint(
+        deviceApp: DeviceApp,
+        owner: String,
+        repo: String,
+    ): String? {
+        val latestRelease = try {
+            _state.update { it.copy(linkValidationStatus = getString(Res.string.checking_release)) }
+            appsRepository.getLatestRelease(owner, repo)
+        } catch (e: RateLimitException) {
+            throw e
+        } catch (e: Exception) {
+            logger.debug("Could not fetch release for validation: ${e.message}")
+            return null
+        }
+
+        if (latestRelease == null) return null
+
+        val installableAssets = latestRelease.assets.filter { installer.isAssetInstallable(it.name) }
+        if (installableAssets.isEmpty()) return null
+
+        val asset = installer.choosePrimaryAsset(installableAssets) ?: return null
+
+        _state.update { it.copy(linkValidationStatus = getString(Res.string.downloading_for_verification)) }
+
+        var filePath: String? = null
+        try {
+            downloader.download(asset.downloadUrl, asset.name).collect { /* progress tracked by spinner */ }
+
+            filePath = downloader.getDownloadedFilePath(asset.name) ?: return null
+
+            _state.update { it.copy(linkValidationStatus = getString(Res.string.verifying_signing_key)) }
+
+            val apkInfo = installer.getApkInfoExtractor().extractPackageInfo(filePath)
+            if (apkInfo == null) {
+                logger.debug("Could not extract APK info for validation")
+                return null
+            }
+
+            if (apkInfo.packageName != deviceApp.packageName) {
+                return getString(
+                    Res.string.package_name_mismatch,
+                    apkInfo.packageName,
+                    deviceApp.packageName,
+                )
+            }
+
+            val deviceFingerprint = deviceApp.signingFingerprint
+            val apkFingerprint = apkInfo.signingFingerprint
+
+            if (deviceFingerprint != null && apkFingerprint != null && deviceFingerprint != apkFingerprint) {
+                return getString(Res.string.signing_key_mismatch_link)
+            }
+
+            return null
+        } finally {
+            try {
+                if (filePath != null) File(filePath).delete()
+            } catch (_: Exception) { }
         }
     }
 
