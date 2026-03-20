@@ -103,7 +103,16 @@ class SearchViewModel(
     private fun observeSeenRepos() {
         viewModelScope.launch {
             seenReposRepository.getAllSeenRepoIds().collect { ids ->
-                _state.update { it.copy(seenRepoIds = ids) }
+                _state.update { current ->
+                    current.copy(
+                        seenRepoIds = ids,
+                        repositories =
+                            current.repositories
+                                .map { repo ->
+                                    repo.copy(isSeen = repo.repository.id in ids)
+                                }.toImmutableList(),
+                    )
+                }
             }
         }
     }
@@ -297,6 +306,8 @@ class SearchViewModel(
                         ).collect { paginatedRepos ->
                             currentPage = paginatedRepos.nextPageIndex
 
+                            val seenIds = _state.value.seenRepoIds
+
                             val newReposWithStatus =
                                 paginatedRepos.repos.map { repo ->
                                     val app = installedMap[repo.id]
@@ -307,6 +318,7 @@ class SearchViewModel(
                                         isInstalled = app != null,
                                         isFavourite = favourite != null,
                                         isStarred = starred != null,
+                                        isSeen = repo.id in seenIds,
                                         isUpdateAvailable = app?.isUpdateAvailable ?: false,
                                         repository = repo.toUi(),
                                     )

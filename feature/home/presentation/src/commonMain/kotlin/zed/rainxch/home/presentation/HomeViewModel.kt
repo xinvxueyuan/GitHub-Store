@@ -202,6 +202,8 @@ class HomeViewModel(
                                 .first()
                                 .associateBy { it.repoId }
 
+                        val seenIds = _state.value.seenRepoIds
+
                         val newReposWithStatus =
                             paginatedRepos.repos.map { repo ->
                                 val app = installedAppsMap[repo.id]
@@ -212,6 +214,7 @@ class HomeViewModel(
                                     isInstalled = app != null,
                                     isFavourite = favourite != null,
                                     isStarred = starred != null,
+                                    isSeen = repo.id in seenIds,
                                     isUpdateAvailable = app?.isUpdateAvailable ?: false,
                                     repository = repo.toUi(),
                                 )
@@ -372,7 +375,16 @@ class HomeViewModel(
     private fun observeSeenRepos() {
         viewModelScope.launch {
             seenReposRepository.getAllSeenRepoIds().collect { ids ->
-                _state.update { it.copy(seenRepoIds = ids) }
+                _state.update { current ->
+                    current.copy(
+                        seenRepoIds = ids,
+                        repos =
+                            current.repos
+                                .map { repo ->
+                                    repo.copy(isSeen = repo.repository.id in ids)
+                                }.toImmutableList(),
+                    )
+                }
             }
         }
     }

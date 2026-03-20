@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +55,7 @@ import zed.rainxch.githubstore.core.presentation.res.forked_repository
 import zed.rainxch.githubstore.core.presentation.res.home_view_details
 import zed.rainxch.githubstore.core.presentation.res.installed
 import zed.rainxch.githubstore.core.presentation.res.open_in_browser
+import zed.rainxch.githubstore.core.presentation.res.seen_badge
 import zed.rainxch.githubstore.core.presentation.res.share_repository
 import zed.rainxch.githubstore.core.presentation.res.update_available
 
@@ -221,12 +223,23 @@ fun RepositoryCard(
                     }
                 }
 
-                if (discoveryRepositoryUi.isInstalled) {
+                if (discoveryRepositoryUi.isInstalled || discoveryRepositoryUi.isSeen) {
                     Spacer(Modifier.height(12.dp))
 
-                    InstallStatusBadge(
-                        isUpdateAvailable = discoveryRepositoryUi.isUpdateAvailable,
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (discoveryRepositoryUi.isInstalled) {
+                            InstallStatusBadge(
+                                isUpdateAvailable = discoveryRepositoryUi.isUpdateAvailable,
+                            )
+                        }
+
+                        if (discoveryRepositoryUi.isSeen) {
+                            SeenBadge()
+                        }
+                    }
                 }
 
                 if (discoveryRepositoryUi.repository.availablePlatforms.isNotEmpty()) {
@@ -428,6 +441,34 @@ fun InstallStatusBadge(
                 text = text,
                 style = MaterialTheme.typography.labelSmall,
                 color = textColor,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
+}
+
+@Composable
+fun SeenBadge(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Visibility,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(Res.string.seen_badge),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.SemiBold,
             )
         }

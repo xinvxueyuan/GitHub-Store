@@ -5,5 +5,6 @@ data class DiscoveryRepositoryUi(
     val isUpdateAvailable: Boolean,
     val isFavourite: Boolean,
     val isStarred: Boolean,
+    val isSeen: Boolean = false,
     val repository: GithubRepoSummaryUi,
 )
