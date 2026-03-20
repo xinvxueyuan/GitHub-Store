@@ -548,4 +548,10 @@
     <string name="update_signing_key_mismatch">Niezgodność klucza podpisu: aktualizacja została podpisana przez innego programistę. Aktualizacja zablokowana.</string>
     <string name="liquid_glass_option_title">Efekt płynnego szkła</string>
     <string name="liquid_glass_option_description">Ulepsz interfejs o gładki, szklany wygląd</string>
+
+    <string name="hide_seen_title">Ukryj przeglądane repozytoria</string>
+    <string name="hide_seen_description">Ukryj repozytoria, które już przeglądałeś, z kanałów odkrywania</string>
+    <string name="clear_seen_history">Wyczyść historię przeglądania</string>
+    <string name="clear_seen_history_description">Zresetuj wszystkie przeglądane repozytoria, aby ponownie pojawiły się w kanałach</string>
+    <string name="seen_history_cleared">Historia przeglądania wyczyszczona</string>
 </resources>

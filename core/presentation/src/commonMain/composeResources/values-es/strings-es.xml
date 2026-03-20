@@ -545,4 +545,10 @@
     <string name="update_signing_key_mismatch">Clave de firma no coincide: la actualización fue firmada por un desarrollador diferente. Actualización bloqueada.</string>
     <string name="liquid_glass_option_title">Efecto de cristal líquido</string>
     <string name="liquid_glass_option_description">Mejora la interfaz con una apariencia suave tipo cristal</string>
+
+    <string name="hide_seen_title">Ocultar repositorios vistos</string>
+    <string name="hide_seen_description">Ocultar repositorios que ya has visto de las fuentes de descubrimiento</string>
+    <string name="clear_seen_history">Borrar historial de vistos</string>
+    <string name="clear_seen_history_description">Restablecer todos los repositorios vistos para que aparezcan de nuevo en las fuentes</string>
+    <string name="seen_history_cleared">Historial de vistos borrado</string>
 </resources>

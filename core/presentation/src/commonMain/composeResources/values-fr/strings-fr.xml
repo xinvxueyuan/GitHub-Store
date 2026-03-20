@@ -546,4 +546,10 @@
     <string name="update_signing_key_mismatch">Incompatibilité de clé de signature : la mise à jour a été signée par un développeur différent. Mise à jour bloquée.</string>
     <string name="liquid_glass_option_title">Effet verre liquide</string>
     <string name="liquid_glass_option_description">Améliorez l\'interface avec une apparence vitreuse et fluide</string>
+
+    <string name="hide_seen_title">Masquer les dépôts consultés</string>
+    <string name="hide_seen_description">Masquer les dépôts que vous avez déjà consultés des flux de découverte</string>
+    <string name="clear_seen_history">Effacer l\'historique des consultations</string>
+    <string name="clear_seen_history_description">Réinitialiser tous les dépôts consultés pour qu\'ils réapparaissent dans les flux</string>
+    <string name="seen_history_cleared">Historique des consultations effacé</string>
 </resources>

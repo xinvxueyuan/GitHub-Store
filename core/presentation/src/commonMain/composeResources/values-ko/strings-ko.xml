@@ -581,4 +581,10 @@
     <string name="update_signing_key_mismatch">서명 키 불일치: 업데이트가 다른 개발자에 의해 서명되었습니다. 업데이트가 차단되었습니다.</string>
     <string name="liquid_glass_option_title">리퀴드 글라스 효과</string>
     <string name="liquid_glass_option_description">매끄러운 유리 같은 외관으로 인터페이스를 향상시킵니다</string>
+
+    <string name="hide_seen_title">본 저장소 숨기기</string>
+    <string name="hide_seen_description">이미 본 저장소를 디스커버리 피드에서 숨깁니다</string>
+    <string name="clear_seen_history">조회 기록 삭제</string>
+    <string name="clear_seen_history_description">모든 조회 기록을 초기화하여 피드에 다시 표시합니다</string>
+    <string name="seen_history_cleared">조회 기록이 삭제되었습니다</string>
 </resources>

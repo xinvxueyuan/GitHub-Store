@@ -584,4 +584,10 @@
     <string name="update_signing_key_mismatch">Chiave di firma non corrispondente: l\'aggiornamento è stato firmato da uno sviluppatore diverso. Aggiornamento bloccato.</string>
     <string name="liquid_glass_option_title">Effetto vetro liquido</string>
     <string name="liquid_glass_option_description">Migliora l\'interfaccia con un aspetto liscio simile al vetro</string>
+
+    <string name="hide_seen_title">Nascondi repository visualizzati</string>
+    <string name="hide_seen_description">Nascondi i repository già visualizzati dai feed di scoperta</string>
+    <string name="clear_seen_history">Cancella cronologia visualizzazioni</string>
+    <string name="clear_seen_history_description">Reimposta tutti i repository visualizzati in modo che ricompaiano nei feed</string>
+    <string name="seen_history_cleared">Cronologia visualizzazioni cancellata</string>
 </resources>

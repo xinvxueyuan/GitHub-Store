@@ -582,4 +582,10 @@
     <string name="update_signing_key_mismatch">İmza anahtarı uyumsuzluğu: güncelleme farklı bir geliştirici tarafından imzalanmış. Güncelleme engellendi.</string>
     <string name="liquid_glass_option_title">Sıvı Cam Efekti</string>
     <string name="liquid_glass_option_description">Arayüzü pürüzsüz cam benzeri bir görünümle geliştirin</string>
+
+    <string name="hide_seen_title">Görülen depoları gizle</string>
+    <string name="hide_seen_description">Zaten görüntülediğiniz depoları keşif akışlarından gizleyin</string>
+    <string name="clear_seen_history">Görüntüleme geçmişini temizle</string>
+    <string name="clear_seen_history_description">Tüm görüntülenen depoları sıfırlayarak akışlarda tekrar görünmelerini sağlayın</string>
+    <string name="seen_history_cleared">Görüntüleme geçmişi temizlendi</string>
 </resources>

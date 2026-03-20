@@ -546,4 +546,10 @@
     <string name="update_signing_key_mismatch">署名キーの不一致: 更新は別の開発者によって署名されています。更新がブロックされました。</string>
     <string name="liquid_glass_option_title">リキッドグラスエフェクト</string>
     <string name="liquid_glass_option_description">滑らかなガラスのような外観でインターフェースを向上させます</string>
+
+    <string name="hide_seen_title">閲覧済みリポジトリを非表示</string>
+    <string name="hide_seen_description">すでに閲覧したリポジトリをディスカバリーフィードから非表示にします</string>
+    <string name="clear_seen_history">閲覧履歴をクリア</string>
+    <string name="clear_seen_history_description">すべての閲覧済みリポジトリをリセットしてフィードに再表示します</string>
+    <string name="seen_history_cleared">閲覧履歴をクリアしました</string>
 </resources>

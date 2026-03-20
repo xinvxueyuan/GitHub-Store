@@ -584,4 +584,10 @@
     <string name="update_signing_key_mismatch">সাইনিং কী অমিল: আপডেটটি একজন ভিন্ন ডেভেলপার দ্বারা সাইন করা হয়েছে। আপডেট ব্লক করা হয়েছে।</string>
     <string name="liquid_glass_option_title">লিকুইড গ্লাস ইফেক্ট</string>
     <string name="liquid_glass_option_description">একটি মসৃণ কাচের মতো চেহারা দিয়ে ইন্টারফেস উন্নত করুন</string>
+
+    <string name="hide_seen_title">দেখা রিপোজিটরি লুকান</string>
+    <string name="hide_seen_description">আপনি ইতিমধ্যে দেখেছেন এমন রিপোজিটরি আবিষ্কার ফিড থেকে লুকান</string>
+    <string name="clear_seen_history">দেখার ইতিহাস মুছুন</string>
+    <string name="clear_seen_history_description">সমস্ত দেখা রিপোজিটরি রিসেট করুন যাতে সেগুলো ফিডে আবার দেখা যায়</string>
+    <string name="seen_history_cleared">দেখার ইতিহাস মুছে ফেলা হয়েছে</string>
 </resources>

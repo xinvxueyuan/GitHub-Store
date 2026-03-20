@@ -547,4 +547,10 @@
     <string name="update_signing_key_mismatch">签名密钥不匹配：更新由不同的开发者签名。更新已阻止。</string>
     <string name="liquid_glass_option_title">液态玻璃效果</string>
     <string name="liquid_glass_option_description">以流畅的玻璃质感提升界面外观</string>
+
+    <string name="hide_seen_title">隐藏已浏览的仓库</string>
+    <string name="hide_seen_description">在发现信息流中隐藏你已经浏览过的仓库</string>
+    <string name="clear_seen_history">清除浏览记录</string>
+    <string name="clear_seen_history_description">重置所有已浏览的仓库，使其重新出现在信息流中</string>
+    <string name="seen_history_cleared">浏览记录已清除</string>
 </resources>

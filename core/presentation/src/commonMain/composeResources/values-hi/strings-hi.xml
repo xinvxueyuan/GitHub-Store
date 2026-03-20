@@ -584,4 +584,10 @@
     <string name="update_signing_key_mismatch">साइनिंग कुंजी मेल नहीं खाती: अपडेट किसी अन्य डेवलपर द्वारा साइन किया गया था। अपडेट ब्लॉक किया गया।</string>
     <string name="liquid_glass_option_title">लिक्विड ग्लास इफ़ेक्ट</string>
     <string name="liquid_glass_option_description">एक चिकने काँच जैसे रूप से इंटरफ़ेस को बेहतर बनाएं</string>
+
+    <string name="hide_seen_title">देखे गए रिपॉजिटरी छुपाएँ</string>
+    <string name="hide_seen_description">पहले से देखे गए रिपॉजिटरी को डिस्कवरी फ़ीड से छुपाएँ</string>
+    <string name="clear_seen_history">देखने का इतिहास साफ़ करें</string>
+    <string name="clear_seen_history_description">सभी देखे गए रिपॉजिटरी रीसेट करें ताकि वे फ़ीड में फिर से दिखें</string>
+    <string name="seen_history_cleared">देखने का इतिहास साफ़ किया गया</string>
 </resources>

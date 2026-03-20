@@ -585,4 +585,10 @@
     <string name="update_signing_key_mismatch">عدم تطابق مفتاح التوقيع: تم توقيع التحديث بواسطة مطور مختلف. تم حظر التحديث.</string>
     <string name="liquid_glass_option_title">تأثير الزجاج السائل</string>
     <string name="liquid_glass_option_description">تحسين الواجهة بمظهر زجاجي ناعم</string>
+
+    <string name="hide_seen_title">إخفاء المستودعات المشاهَدة</string>
+    <string name="hide_seen_description">إخفاء المستودعات التي شاهدتها بالفعل من خلاصات الاكتشاف</string>
+    <string name="clear_seen_history">مسح سجل المشاهدة</string>
+    <string name="clear_seen_history_description">إعادة تعيين جميع المستودعات المشاهَدة لتظهر مجدداً في الخلاصات</string>
+    <string name="seen_history_cleared">تم مسح سجل المشاهدة</string>
 </resources>
