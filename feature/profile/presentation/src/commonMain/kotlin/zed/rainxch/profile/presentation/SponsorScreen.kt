@@ -90,20 +90,8 @@ fun SponsorScreen(onNavigateBack: () -> Unit) {
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Hero section
             HeroSection()
 
-            // Golden Kodee voting CTA - the highlight
-            GoldenKodeeCard(
-                onRegisterClick = {
-                    onOpenUrl("https://golden-kodee.awardsplatform.com/")
-                },
-                onVoteClick = {
-                    onOpenUrl("https://golden-kodee.awardsplatform.com/entry/vote/mNKjQxkX")
-                },
-            )
-
-            // Financial support options
             SponsorOptionCard(
                 icon = Icons.Filled.Favorite,
                 title = stringResource(Res.string.sponsor_github_sponsors),
@@ -124,10 +112,8 @@ fun SponsorScreen(onNavigateBack: () -> Unit) {
 
             Spacer(Modifier.height(8.dp))
 
-            // Other ways to help
             OtherWaysSection(onOpenUrl = onOpenUrl)
 
-            // Thank you note
             Text(
                 text = stringResource(Res.string.sponsor_thank_you),
                 style = MaterialTheme.typography.bodyLarge,
@@ -198,141 +184,6 @@ private fun HeroSection() {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 8.dp),
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun GoldenKodeeCard(
-    onRegisterClick: () -> Unit,
-    onVoteClick: () -> Unit,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-            ),
-        shape = RoundedCornerShape(28.dp),
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.EmojiEvents,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            Text(
-                text = stringResource(Res.string.sponsor_kodee_title),
-                style = MaterialTheme.typography.titleLargeEmphasized,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(Res.string.sponsor_kodee_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Steps
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.08f))
-                        .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = stringResource(Res.string.sponsor_kodee_step1),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-                )
-                Text(
-                    text = stringResource(Res.string.sponsor_kodee_step2),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-                )
-                Text(
-                    text = stringResource(Res.string.sponsor_kodee_step3),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                FilledTonalButton(
-                    onClick = onRegisterClick,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors =
-                        ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.15f),
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.sponsor_kodee_register),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-
-                ElevatedButton(
-                    onClick = onVoteClick,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors =
-                        ButtonDefaults.elevatedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.EmojiEvents,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(Res.string.sponsor_kodee_vote),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(Res.string.sponsor_kodee_deadline),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
-                fontWeight = FontWeight.Medium,
-            )
-        }
     }
 }
 
