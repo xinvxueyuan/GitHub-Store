@@ -81,14 +81,17 @@ actual fun createPlatformHttpClient(proxyConfig: ProxyConfig): HttpClient {
 }
 
 internal fun resolveAndroidSystemProxy(): Proxy {
+    // System properties are user/OS-supplied, so guard against malformed
+    // values: InetSocketAddress(String, Int) throws IllegalArgumentException
+    // for ports outside 0..65535.
     val httpsHost = System.getProperty("https.proxyHost")?.takeIf { it.isNotBlank() }
-    val httpsPort = System.getProperty("https.proxyPort")?.toIntOrNull()
+    val httpsPort = System.getProperty("https.proxyPort")?.toIntOrNull()?.takeIf { it in 1..65535 }
     if (httpsHost != null && httpsPort != null) {
         return Proxy(Proxy.Type.HTTP, InetSocketAddress(httpsHost, httpsPort))
     }
 
     val httpHost = System.getProperty("http.proxyHost")?.takeIf { it.isNotBlank() }
-    val httpPort = System.getProperty("http.proxyPort")?.toIntOrNull()
+    val httpPort = System.getProperty("http.proxyPort")?.toIntOrNull()?.takeIf { it in 1..65535 }
     if (httpHost != null && httpPort != null) {
         return Proxy(Proxy.Type.HTTP, InetSocketAddress(httpHost, httpPort))
     }

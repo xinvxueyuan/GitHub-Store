@@ -2,6 +2,7 @@ package zed.rainxch.tweaks.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -410,10 +411,17 @@ class TweaksViewModel(
                 val config = buildProxyConfigForTest() ?: return
                 _state.update { it.copy(isProxyTestInProgress = true) }
                 viewModelScope.launch {
-                    val outcome =
-                        runCatching { proxyTester.test(config) }
-                            .getOrElse { ProxyTestOutcome.Failure.Unknown(it.message) }
-                    _state.update { it.copy(isProxyTestInProgress = false) }
+                    val outcome: ProxyTestOutcome =
+                        try {
+                            proxyTester.test(config)
+                        } catch (e: CancellationException) {
+                            // Preserve structured concurrency — never swallow.
+                            throw e
+                        } catch (e: Exception) {
+                            ProxyTestOutcome.Failure.Unknown(e.message)
+                        } finally {
+                            _state.update { it.copy(isProxyTestInProgress = false) }
+                        }
                     _events.send(outcome.toEvent())
                 }
             }
@@ -578,8 +586,10 @@ class TweaksViewModel(
                 )
 
             is ProxyTestOutcome.Failure.Unknown ->
-                TweaksEvent.OnProxyTestError(
-                    message ?: getString(Res.string.proxy_test_error_unknown),
-                )
+                // Raw exception messages are platform-specific, untranslated,
+                // and may leak internal detail — always show the localized
+                // fallback to the user. The original `message` is intentionally
+                // dropped here; surface it via logging if diagnostics are needed.
+                TweaksEvent.OnProxyTestError(getString(Res.string.proxy_test_error_unknown))
         }
 }

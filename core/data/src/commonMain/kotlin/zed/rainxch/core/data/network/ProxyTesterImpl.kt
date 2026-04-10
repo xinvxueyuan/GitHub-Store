@@ -56,7 +56,7 @@ class ProxyTesterImpl : ProxyTester {
             ProxyTestOutcome.Failure.ProxyUnreachable
         } catch (e: IOException) {
             ProxyTestOutcome.Failure.Unknown(e.message)
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             ProxyTestOutcome.Failure.Unknown(e.message)
         } finally {
             client.close()
