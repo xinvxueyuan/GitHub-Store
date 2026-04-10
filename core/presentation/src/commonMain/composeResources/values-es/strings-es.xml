@@ -375,6 +375,15 @@
     <string name="invalid_proxy_port">Puerto de proxy no válido</string>
     <string name="proxy_show_password">Mostrar contraseña</string>
     <string name="proxy_hide_password">Ocultar contraseña</string>
+    <string name="proxy_test">Probar</string>
+    <string name="proxy_test_in_progress">Probando…</string>
+    <string name="proxy_test_success">Conexión correcta (%1$d ms)</string>
+    <string name="proxy_test_error_dns">No se pudo resolver el host. Verifica la dirección del proxy.</string>
+    <string name="proxy_test_error_unreachable">No se pudo conectar con el servidor proxy.</string>
+    <string name="proxy_test_error_timeout">Se agotó el tiempo de conexión.</string>
+    <string name="proxy_test_error_auth_required">Se requiere autenticación del proxy.</string>
+    <string name="proxy_test_error_status">Respuesta inesperada: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">La prueba de conexión falló</string>
 
 
     <!-- Track app feature -->

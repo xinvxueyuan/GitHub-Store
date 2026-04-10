@@ -376,6 +376,15 @@
     <string name="invalid_proxy_port">无效的代理端口</string>
     <string name="proxy_show_password">显示密码</string>
     <string name="proxy_hide_password">隐藏密码</string>
+    <string name="proxy_test">测试</string>
+    <string name="proxy_test_in_progress">测试中…</string>
+    <string name="proxy_test_success">连接正常 (%1$d ms)</string>
+    <string name="proxy_test_error_dns">无法解析主机。请检查代理地址。</string>
+    <string name="proxy_test_error_unreachable">无法连接到代理服务器。</string>
+    <string name="proxy_test_error_timeout">连接超时。</string>
+    <string name="proxy_test_error_auth_required">需要代理身份验证。</string>
+    <string name="proxy_test_error_status">意外响应：HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">连接测试失败</string>
 
 
     <!-- Track app feature -->

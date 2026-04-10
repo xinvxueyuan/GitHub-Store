@@ -7,6 +7,14 @@ sealed interface TweaksEvent {
         val message: String,
     ) : TweaksEvent
 
+    data class OnProxyTestSuccess(
+        val latencyMs: Long,
+    ) : TweaksEvent
+
+    data class OnProxyTestError(
+        val message: String,
+    ) : TweaksEvent
+
     data object OnCacheCleared : TweaksEvent
 
     data class OnCacheClearError(

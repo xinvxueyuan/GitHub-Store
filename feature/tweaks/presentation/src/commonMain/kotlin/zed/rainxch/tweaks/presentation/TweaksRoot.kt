@@ -36,6 +36,7 @@ import zed.rainxch.core.presentation.utils.ObserveAsEvents
 import zed.rainxch.githubstore.core.presentation.res.Res
 import zed.rainxch.githubstore.core.presentation.res.downloads_cleared
 import zed.rainxch.githubstore.core.presentation.res.proxy_saved
+import zed.rainxch.githubstore.core.presentation.res.proxy_test_success
 import zed.rainxch.githubstore.core.presentation.res.seen_history_cleared
 import zed.rainxch.githubstore.core.presentation.res.tweaks_title
 import zed.rainxch.tweaks.presentation.components.ClearDownloadsDialog
@@ -72,6 +73,20 @@ fun TweaksRoot(viewModel: TweaksViewModel = koinViewModel()) {
             }
 
             is TweaksEvent.OnProxySaveError -> {
+                coroutineScope.launch {
+                    snackbarState.showSnackbar(event.message)
+                }
+            }
+
+            is TweaksEvent.OnProxyTestSuccess -> {
+                coroutineScope.launch {
+                    snackbarState.showSnackbar(
+                        getString(Res.string.proxy_test_success, event.latencyMs),
+                    )
+                }
+            }
+
+            is TweaksEvent.OnProxyTestError -> {
                 coroutineScope.launch {
                     snackbarState.showSnackbar(event.message)
                 }

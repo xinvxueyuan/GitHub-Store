@@ -409,6 +409,15 @@
     <string name="invalid_proxy_port">अमान्य प्रॉक्सी पोर्ट</string>
     <string name="proxy_show_password">पासवर्ड दिखाएँ</string>
     <string name="proxy_hide_password">पासवर्ड छुपाएँ</string>
+    <string name="proxy_test">परीक्षण</string>
+    <string name="proxy_test_in_progress">परीक्षण हो रहा है…</string>
+    <string name="proxy_test_success">कनेक्शन ठीक है (%1$d ms)</string>
+    <string name="proxy_test_error_dns">होस्ट हल नहीं हो सका। प्रॉक्सी पता जाँचें।</string>
+    <string name="proxy_test_error_unreachable">प्रॉक्सी सर्वर तक नहीं पहुँचा जा सका।</string>
+    <string name="proxy_test_error_timeout">कनेक्शन समय समाप्त हो गया।</string>
+    <string name="proxy_test_error_auth_required">प्रॉक्सी प्रमाणीकरण आवश्यक है।</string>
+    <string name="proxy_test_error_status">अप्रत्याशित प्रतिक्रिया: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">कनेक्शन परीक्षण विफल</string>
 
 
     <!-- Track app feature -->

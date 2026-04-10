@@ -375,6 +375,15 @@
     <string name="invalid_proxy_port">Port proxy invalide</string>
     <string name="proxy_show_password">Afficher le mot de passe</string>
     <string name="proxy_hide_password">Masquer le mot de passe</string>
+    <string name="proxy_test">Tester</string>
+    <string name="proxy_test_in_progress">Test en cours…</string>
+    <string name="proxy_test_success">Connexion OK (%1$d ms)</string>
+    <string name="proxy_test_error_dns">Impossible de résoudre l\'hôte. Vérifiez l\'adresse du proxy.</string>
+    <string name="proxy_test_error_unreachable">Impossible de joindre le serveur proxy.</string>
+    <string name="proxy_test_error_timeout">Délai de connexion dépassé.</string>
+    <string name="proxy_test_error_auth_required">Authentification proxy requise.</string>
+    <string name="proxy_test_error_status">Réponse inattendue : HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">Échec du test de connexion</string>
 
 
     <!-- Track app feature -->

@@ -11,6 +11,7 @@ import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import zed.rainxch.core.data.network.ProxyManager
+import zed.rainxch.core.data.network.resolveAndroidSystemProxy
 import zed.rainxch.core.domain.model.DownloadProgress
 import zed.rainxch.core.domain.model.ProxyConfig
 import zed.rainxch.core.domain.network.Downloader
@@ -44,7 +45,12 @@ class AndroidDownloader(
                         proxy(Proxy.NO_PROXY)
                     }
 
-                    is ProxyConfig.System -> {}
+                    is ProxyConfig.System -> {
+                        // ProxySelector.getDefault() does not honor Android's
+                        // per-network HTTP proxy; resolve it explicitly so
+                        // downloads also flow through the device proxy.
+                        proxy(resolveAndroidSystemProxy())
+                    }
 
                     is ProxyConfig.Http -> {
                         proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(config.host, config.port)))

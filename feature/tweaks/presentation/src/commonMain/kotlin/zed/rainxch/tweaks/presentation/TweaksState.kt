@@ -18,6 +18,7 @@ data class TweaksState(
     val proxyUsername: String = "",
     val proxyPassword: String = "",
     val isProxyPasswordVisible: Boolean = false,
+    val isProxyTestInProgress: Boolean = false,
     val autoDetectClipboardLinks: Boolean = true,
     val cacheSize: String = "",
     val isClearDownloadsDialogVisible: Boolean = false,

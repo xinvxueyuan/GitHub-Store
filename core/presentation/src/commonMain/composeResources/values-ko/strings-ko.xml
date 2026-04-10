@@ -408,6 +408,15 @@
     <string name="invalid_proxy_port">잘못된 프록시 포트</string>
     <string name="proxy_show_password">비밀번호 표시</string>
     <string name="proxy_hide_password">비밀번호 숨기기</string>
+    <string name="proxy_test">테스트</string>
+    <string name="proxy_test_in_progress">테스트 중…</string>
+    <string name="proxy_test_success">연결 성공 (%1$d ms)</string>
+    <string name="proxy_test_error_dns">호스트를 확인할 수 없습니다. 프록시 주소를 확인하세요.</string>
+    <string name="proxy_test_error_unreachable">프록시 서버에 연결할 수 없습니다.</string>
+    <string name="proxy_test_error_timeout">연결 시간이 초과되었습니다.</string>
+    <string name="proxy_test_error_auth_required">프록시 인증이 필요합니다.</string>
+    <string name="proxy_test_error_status">예기치 않은 응답: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">연결 테스트 실패</string>
 
 
     <!-- Track app feature -->

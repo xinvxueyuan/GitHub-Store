@@ -411,6 +411,15 @@
     <string name="invalid_proxy_port">Porta proxy non valida</string>
     <string name="proxy_show_password">Mostra password</string>
     <string name="proxy_hide_password">Nascondi password</string>
+    <string name="proxy_test">Verifica</string>
+    <string name="proxy_test_in_progress">Verifica in corso…</string>
+    <string name="proxy_test_success">Connessione OK (%1$d ms)</string>
+    <string name="proxy_test_error_dns">Impossibile risolvere l\'host. Controlla l\'indirizzo del proxy.</string>
+    <string name="proxy_test_error_unreachable">Impossibile raggiungere il server proxy.</string>
+    <string name="proxy_test_error_timeout">Timeout della connessione.</string>
+    <string name="proxy_test_error_auth_required">Autenticazione proxy richiesta.</string>
+    <string name="proxy_test_error_status">Risposta inattesa: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">Verifica connessione non riuscita</string>
 
 
     <!-- Track app feature -->

@@ -56,6 +56,8 @@ sealed interface TweaksAction {
 
     data object OnProxySave : TweaksAction
 
+    data object OnProxyTest : TweaksAction
+
     data class OnInstallerTypeSelected(
         val type: InstallerType,
     ) : TweaksAction

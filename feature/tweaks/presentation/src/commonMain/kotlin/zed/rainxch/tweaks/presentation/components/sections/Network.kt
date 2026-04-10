@@ -19,10 +19,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
@@ -30,6 +32,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -72,16 +75,27 @@ fun LazyListScope.networkSection(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut(),
         ) {
-            Text(
-                text =
-                    when (state.proxyType) {
-                        ProxyType.SYSTEM -> stringResource(Res.string.proxy_system_description)
-                        else -> stringResource(Res.string.proxy_none_description)
-                    },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 8.dp, top = 12.dp),
-            )
+            Column {
+                Text(
+                    text =
+                        when (state.proxyType) {
+                            ProxyType.SYSTEM -> stringResource(Res.string.proxy_system_description)
+                            else -> stringResource(Res.string.proxy_none_description)
+                        },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 8.dp, top = 12.dp),
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                ProxyTestButton(
+                    isInProgress = state.isProxyTestInProgress,
+                    enabled = !state.isProxyTestInProgress,
+                    onClick = { onAction(TweaksAction.OnProxyTest) },
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
         }
 
         AnimatedVisibility(
@@ -266,20 +280,64 @@ private fun ProxyDetailsCard(
                 shape = RoundedCornerShape(12.dp),
             )
 
-            // Save button
-            FilledTonalButton(
-                onClick = { onAction(TweaksAction.OnProxySave) },
-                enabled = isFormValid,
+            // Test + Save buttons
+            Row(
                 modifier = Modifier.align(Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = Icons.Default.Save,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
+                ProxyTestButton(
+                    isInProgress = state.isProxyTestInProgress,
+                    enabled = isFormValid && !state.isProxyTestInProgress,
+                    onClick = { onAction(TweaksAction.OnProxyTest) },
                 )
-                Spacer(Modifier.size(8.dp))
-                Text(stringResource(Res.string.proxy_save))
+
+                FilledTonalButton(
+                    onClick = { onAction(TweaksAction.OnProxySave) },
+                    enabled = isFormValid && !state.isProxyTestInProgress,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(Res.string.proxy_save))
+                }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ProxyTestButton(
+    isInProgress: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier,
+    ) {
+        if (isInProgress) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(stringResource(Res.string.proxy_test_in_progress))
+        } else {
+            Icon(
+                imageVector = Icons.Default.NetworkCheck,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(stringResource(Res.string.proxy_test))
         }
     }
 }

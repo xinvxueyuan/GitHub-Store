@@ -2,6 +2,7 @@ package zed.rainxch.tweaks.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.network.ProxyTestOutcome
+import zed.rainxch.core.domain.network.ProxyTester
 import zed.rainxch.core.domain.repository.ProxyRepository
 import zed.rainxch.core.domain.repository.SeenReposRepository
 import zed.rainxch.core.domain.repository.TweaksRepository
@@ -23,6 +26,12 @@ import zed.rainxch.githubstore.core.presentation.res.Res
 import zed.rainxch.githubstore.core.presentation.res.failed_to_save_proxy_settings
 import zed.rainxch.githubstore.core.presentation.res.invalid_proxy_port
 import zed.rainxch.githubstore.core.presentation.res.proxy_host_required
+import zed.rainxch.githubstore.core.presentation.res.proxy_test_error_auth_required
+import zed.rainxch.githubstore.core.presentation.res.proxy_test_error_dns
+import zed.rainxch.githubstore.core.presentation.res.proxy_test_error_status
+import zed.rainxch.githubstore.core.presentation.res.proxy_test_error_timeout
+import zed.rainxch.githubstore.core.presentation.res.proxy_test_error_unknown
+import zed.rainxch.githubstore.core.presentation.res.proxy_test_error_unreachable
 import zed.rainxch.profile.domain.repository.ProfileRepository
 import zed.rainxch.tweaks.presentation.model.ProxyType
 
@@ -32,6 +41,7 @@ class TweaksViewModel(
     private val profileRepository: ProfileRepository,
     private val installerStatusProvider: InstallerStatusProvider,
     private val proxyRepository: ProxyRepository,
+    private val proxyTester: ProxyTester,
     private val updateScheduleManager: UpdateScheduleManager,
     private val seenReposRepository: SeenReposRepository,
 ) : ViewModel() {
@@ -396,6 +406,26 @@ class TweaksViewModel(
                 }
             }
 
+            TweaksAction.OnProxyTest -> {
+                if (_state.value.isProxyTestInProgress) return
+                val config = buildProxyConfigForTest() ?: return
+                _state.update { it.copy(isProxyTestInProgress = true) }
+                viewModelScope.launch {
+                    val outcome: ProxyTestOutcome =
+                        try {
+                            proxyTester.test(config)
+                        } catch (e: CancellationException) {
+                            // Preserve structured concurrency — never swallow.
+                            throw e
+                        } catch (e: Exception) {
+                            ProxyTestOutcome.Failure.Unknown(e.message)
+                        } finally {
+                            _state.update { it.copy(isProxyTestInProgress = false) }
+                        }
+                    _events.send(outcome.toEvent())
+                }
+            }
+
             is TweaksAction.OnInstallerTypeSelected -> {
                 viewModelScope.launch {
                     tweaksRepository.setInstallerType(action.type)
@@ -483,4 +513,83 @@ class TweaksViewModel(
             }
         }
     }
+
+    /**
+     * Builds the [ProxyConfig] to test from the current form state. For
+     * [ProxyType.HTTP] / [ProxyType.SOCKS] this requires a valid host and port —
+     * if either is missing the user is told via an error event and `null` is
+     * returned, mirroring the validation in [TweaksAction.OnProxySave].
+     */
+    private fun buildProxyConfigForTest(): ProxyConfig? {
+        val current = _state.value
+        return when (current.proxyType) {
+            ProxyType.NONE -> ProxyConfig.None
+            ProxyType.SYSTEM -> ProxyConfig.System
+            ProxyType.HTTP, ProxyType.SOCKS -> {
+                val port =
+                    current.proxyPort
+                        .toIntOrNull()
+                        ?.takeIf { it in 1..65535 }
+                        ?: run {
+                            viewModelScope.launch {
+                                _events.send(
+                                    TweaksEvent.OnProxyTestError(
+                                        getString(Res.string.invalid_proxy_port),
+                                    ),
+                                )
+                            }
+                            return null
+                        }
+                val host =
+                    current.proxyHost.trim().takeIf { it.isNotBlank() }
+                        ?: run {
+                            viewModelScope.launch {
+                                _events.send(
+                                    TweaksEvent.OnProxyTestError(
+                                        getString(Res.string.proxy_host_required),
+                                    ),
+                                )
+                            }
+                            return null
+                        }
+                val username = current.proxyUsername.takeIf { it.isNotBlank() }
+                val password = current.proxyPassword.takeIf { it.isNotBlank() }
+                if (current.proxyType == ProxyType.HTTP) {
+                    ProxyConfig.Http(host, port, username, password)
+                } else {
+                    ProxyConfig.Socks(host, port, username, password)
+                }
+            }
+        }
+    }
+
+    private suspend fun ProxyTestOutcome.toEvent(): TweaksEvent =
+        when (this) {
+            is ProxyTestOutcome.Success ->
+                TweaksEvent.OnProxyTestSuccess(latencyMs = latencyMs)
+
+            ProxyTestOutcome.Failure.DnsFailure ->
+                TweaksEvent.OnProxyTestError(getString(Res.string.proxy_test_error_dns))
+
+            ProxyTestOutcome.Failure.ProxyUnreachable ->
+                TweaksEvent.OnProxyTestError(getString(Res.string.proxy_test_error_unreachable))
+
+            ProxyTestOutcome.Failure.Timeout ->
+                TweaksEvent.OnProxyTestError(getString(Res.string.proxy_test_error_timeout))
+
+            ProxyTestOutcome.Failure.ProxyAuthRequired ->
+                TweaksEvent.OnProxyTestError(getString(Res.string.proxy_test_error_auth_required))
+
+            is ProxyTestOutcome.Failure.UnexpectedResponse ->
+                TweaksEvent.OnProxyTestError(
+                    getString(Res.string.proxy_test_error_status, statusCode),
+                )
+
+            is ProxyTestOutcome.Failure.Unknown ->
+                // Raw exception messages are platform-specific, untranslated,
+                // and may leak internal detail — always show the localized
+                // fallback to the user. The original `message` is intentionally
+                // dropped here; surface it via logging if diagnostics are needed.
+                TweaksEvent.OnProxyTestError(getString(Res.string.proxy_test_error_unknown))
+        }
 }

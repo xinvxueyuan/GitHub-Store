@@ -8,7 +8,6 @@ import java.net.Authenticator
 import java.net.InetSocketAddress
 import java.net.PasswordAuthentication
 import java.net.Proxy
-import java.net.ProxySelector
 
 actual fun createPlatformHttpClient(proxyConfig: ProxyConfig): HttpClient {
     Authenticator.setDefault(null)
@@ -21,9 +20,11 @@ actual fun createPlatformHttpClient(proxyConfig: ProxyConfig): HttpClient {
                 }
 
                 is ProxyConfig.System -> {
-                    config {
-                        proxySelector(ProxySelector.getDefault())
-                    }
+                    // java.net.ProxySelector.getDefault() does not read Android's
+                    // per-network HTTP proxy. Android publishes the active proxy
+                    // through standard system properties instead, which we resolve
+                    // explicitly here so traffic actually flows through it.
+                    proxy = resolveAndroidSystemProxy()
                 }
 
                 is ProxyConfig.Http -> {
@@ -77,4 +78,23 @@ actual fun createPlatformHttpClient(proxyConfig: ProxyConfig): HttpClient {
             }
         }
     }
+}
+
+internal fun resolveAndroidSystemProxy(): Proxy {
+    // System properties are user/OS-supplied, so guard against malformed
+    // values: InetSocketAddress(String, Int) throws IllegalArgumentException
+    // for ports outside 0..65535.
+    val httpsHost = System.getProperty("https.proxyHost")?.takeIf { it.isNotBlank() }
+    val httpsPort = System.getProperty("https.proxyPort")?.toIntOrNull()?.takeIf { it in 1..65535 }
+    if (httpsHost != null && httpsPort != null) {
+        return Proxy(Proxy.Type.HTTP, InetSocketAddress(httpsHost, httpsPort))
+    }
+
+    val httpHost = System.getProperty("http.proxyHost")?.takeIf { it.isNotBlank() }
+    val httpPort = System.getProperty("http.proxyPort")?.toIntOrNull()?.takeIf { it in 1..65535 }
+    if (httpHost != null && httpPort != null) {
+        return Proxy(Proxy.Type.HTTP, InetSocketAddress(httpHost, httpPort))
+    }
+
+    return Proxy.NO_PROXY
 }

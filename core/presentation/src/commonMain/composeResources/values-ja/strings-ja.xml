@@ -375,6 +375,15 @@
     <string name="invalid_proxy_port">無効なプロキシポート</string>
     <string name="proxy_show_password">パスワードを表示</string>
     <string name="proxy_hide_password">パスワードを非表示</string>
+    <string name="proxy_test">テスト</string>
+    <string name="proxy_test_in_progress">テスト中…</string>
+    <string name="proxy_test_success">接続OK (%1$d ms)</string>
+    <string name="proxy_test_error_dns">ホストを解決できません。プロキシアドレスを確認してください。</string>
+    <string name="proxy_test_error_unreachable">プロキシサーバーに接続できません。</string>
+    <string name="proxy_test_error_timeout">接続がタイムアウトしました。</string>
+    <string name="proxy_test_error_auth_required">プロキシ認証が必要です。</string>
+    <string name="proxy_test_error_status">予期しない応答：HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">接続テストに失敗しました</string>
 
 
     <!-- Track app feature -->

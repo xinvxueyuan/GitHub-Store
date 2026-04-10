@@ -149,6 +149,15 @@
     <string name="invalid_proxy_port">منفذ الوكيل غير صالح</string>
     <string name="proxy_show_password">إظهار كلمة المرور</string>
     <string name="proxy_hide_password">إخفاء كلمة المرور</string>
+    <string name="proxy_test">اختبار</string>
+    <string name="proxy_test_in_progress">جارٍ الاختبار…</string>
+    <string name="proxy_test_success">الاتصال ناجح (%1$d مللي ثانية)</string>
+    <string name="proxy_test_error_dns">تعذر تحليل المضيف. تحقق من عنوان الوكيل.</string>
+    <string name="proxy_test_error_unreachable">تعذر الوصول إلى خادم الوكيل.</string>
+    <string name="proxy_test_error_timeout">انتهت مهلة الاتصال.</string>
+    <string name="proxy_test_error_auth_required">يلزم التحقق من الوكيل.</string>
+    <string name="proxy_test_error_status">استجابة غير متوقعة: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">فشل اختبار الاتصال</string>
 
     <!-- Snackbar -->
     <string name="logout_success">تم تسجيل الخروج بنجاح، جارٍ إعادة التوجيه...</string>

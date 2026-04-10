@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -r \"\\\\.FLATPAK\\\\|Flatpak\\\\|flatpak\" D:/development/Github-Store --include=*.kt)"
+      "Bash(grep -r \"\\\\.FLATPAK\\\\|Flatpak\\\\|flatpak\" . --include=*.kt)",
+      "Bash(./gradlew :composeApp:assembleDebug)",
+      "Bash(./gradlew :composeApp:jvmJar)",
+      "Bash(./gradlew :composeApp:assembleDebug :composeApp:jvmJar)"
     ]
   }
 }

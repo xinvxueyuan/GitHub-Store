@@ -410,6 +410,15 @@
     <string name="invalid_proxy_port">অবৈধ প্রক্সি পোর্ট</string>
     <string name="proxy_show_password">পাসওয়ার্ড দেখান</string>
     <string name="proxy_hide_password">পাসওয়ার্ড লুকান</string>
+    <string name="proxy_test">পরীক্ষা</string>
+    <string name="proxy_test_in_progress">পরীক্ষা চলছে…</string>
+    <string name="proxy_test_success">সংযোগ ঠিক আছে (%1$d ms)</string>
+    <string name="proxy_test_error_dns">হোস্ট সমাধান করা যায়নি। প্রক্সি ঠিকানা যাচাই করুন।</string>
+    <string name="proxy_test_error_unreachable">প্রক্সি সার্ভারে পৌঁছানো যায়নি।</string>
+    <string name="proxy_test_error_timeout">সংযোগের সময় শেষ হয়ে গেছে।</string>
+    <string name="proxy_test_error_auth_required">প্রক্সি প্রমাণীকরণ প্রয়োজন।</string>
+    <string name="proxy_test_error_status">অপ্রত্যাশিত প্রতিক্রিয়া: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">সংযোগ পরীক্ষা ব্যর্থ</string>
 
 
     <!-- Track app feature -->

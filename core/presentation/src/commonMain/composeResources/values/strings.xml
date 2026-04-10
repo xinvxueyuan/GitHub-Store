@@ -152,6 +152,15 @@
     <string name="invalid_proxy_port">Invalid proxy port</string>
     <string name="proxy_show_password">Show password</string>
     <string name="proxy_hide_password">Hide password</string>
+    <string name="proxy_test">Test</string>
+    <string name="proxy_test_in_progress">Testing…</string>
+    <string name="proxy_test_success">Connection OK (%1$d ms)</string>
+    <string name="proxy_test_error_dns">Could not resolve host. Check the proxy address.</string>
+    <string name="proxy_test_error_unreachable">Could not reach the proxy server.</string>
+    <string name="proxy_test_error_timeout">Connection timed out.</string>
+    <string name="proxy_test_error_auth_required">Proxy authentication required.</string>
+    <string name="proxy_test_error_status">Unexpected response: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">Connection test failed</string>
 
     <!-- Snackbar -->
     <string name="logout_success">Logged out successfully, redirecting...</string>

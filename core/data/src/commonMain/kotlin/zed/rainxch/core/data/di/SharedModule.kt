@@ -22,6 +22,7 @@ import zed.rainxch.core.data.local.db.dao.UpdateHistoryDao
 import zed.rainxch.core.data.logging.KermitLogger
 import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.data.network.ProxyManager
+import zed.rainxch.core.data.network.ProxyTesterImpl
 import zed.rainxch.core.data.network.createGitHubHttpClient
 import zed.rainxch.core.data.repository.AuthenticationStateImpl
 import zed.rainxch.core.data.repository.FavouritesRepositoryImpl
@@ -36,6 +37,7 @@ import zed.rainxch.core.domain.getPlatform
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
 import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.network.ProxyTester
 import zed.rainxch.core.domain.repository.AuthenticationState
 import zed.rainxch.core.domain.repository.FavouritesRepository
 import zed.rainxch.core.domain.repository.InstalledAppsRepository
@@ -115,6 +117,10 @@ val coreModule =
             ProxyRepositoryImpl(
                 preferences = get(),
             )
+        }
+
+        single<ProxyTester> {
+            ProxyTesterImpl()
         }
 
         single<SyncInstalledAppsUseCase> {

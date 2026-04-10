@@ -407,6 +407,15 @@
     <string name="invalid_proxy_port">Geçersiz proxy portu</string>
     <string name="proxy_show_password">Şifreyi göster</string>
     <string name="proxy_hide_password">Şifreyi gizle</string>
+    <string name="proxy_test">Test</string>
+    <string name="proxy_test_in_progress">Test ediliyor…</string>
+    <string name="proxy_test_success">Bağlantı tamam (%1$d ms)</string>
+    <string name="proxy_test_error_dns">Sunucu adresi çözümlenemedi. Proxy adresini kontrol edin.</string>
+    <string name="proxy_test_error_unreachable">Proxy sunucusuna ulaşılamadı.</string>
+    <string name="proxy_test_error_timeout">Bağlantı zaman aşımına uğradı.</string>
+    <string name="proxy_test_error_auth_required">Proxy kimlik doğrulaması gerekiyor.</string>
+    <string name="proxy_test_error_status">Beklenmeyen yanıt: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">Bağlantı testi başarısız</string>
 
 
     <!-- Track app feature -->

@@ -375,6 +375,15 @@
     <string name="invalid_proxy_port">Недопустимый порт прокси</string>
     <string name="proxy_show_password">Показать пароль</string>
     <string name="proxy_hide_password">Скрыть пароль</string>
+    <string name="proxy_test">Проверить</string>
+    <string name="proxy_test_in_progress">Проверка…</string>
+    <string name="proxy_test_success">Соединение в порядке (%1$d мс)</string>
+    <string name="proxy_test_error_dns">Не удалось разрешить хост. Проверьте адрес прокси.</string>
+    <string name="proxy_test_error_unreachable">Не удалось подключиться к прокси-серверу.</string>
+    <string name="proxy_test_error_timeout">Время ожидания истекло.</string>
+    <string name="proxy_test_error_auth_required">Требуется аутентификация прокси.</string>
+    <string name="proxy_test_error_status">Неожиданный ответ: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">Не удалось проверить соединение</string>
 
 
     <!-- Track app feature -->

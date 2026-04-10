@@ -373,6 +373,15 @@
     <string name="invalid_proxy_port">Nieprawidłowy port proxy</string>
     <string name="proxy_show_password">Pokaż hasło</string>
     <string name="proxy_hide_password">Ukryj hasło</string>
+    <string name="proxy_test">Testuj</string>
+    <string name="proxy_test_in_progress">Testowanie…</string>
+    <string name="proxy_test_success">Połączenie OK (%1$d ms)</string>
+    <string name="proxy_test_error_dns">Nie można rozwiązać hosta. Sprawdź adres proxy.</string>
+    <string name="proxy_test_error_unreachable">Nie można połączyć się z serwerem proxy.</string>
+    <string name="proxy_test_error_timeout">Upłynął limit czasu połączenia.</string>
+    <string name="proxy_test_error_auth_required">Wymagane uwierzytelnienie proxy.</string>
+    <string name="proxy_test_error_status">Nieoczekiwana odpowiedź: HTTP %1$d</string>
+    <string name="proxy_test_error_unknown">Test połączenia nie powiódł się</string>
 
 
     <!-- Track app feature -->
