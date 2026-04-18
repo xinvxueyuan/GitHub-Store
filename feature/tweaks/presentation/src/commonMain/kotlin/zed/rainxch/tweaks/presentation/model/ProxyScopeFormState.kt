@@ -15,4 +15,13 @@ data class ProxyScopeFormState(
     val password: String = "",
     val isPasswordVisible: Boolean = false,
     val isTestInProgress: Boolean = false,
+    /**
+     * True once the user has edited any field in this scope's form.
+     * Gates the preferences-to-form hydration path in the ViewModel:
+     * once a scope is dirty, incoming emissions from DataStore are
+     * ignored for that scope until the user saves (commits) or resets,
+     * so a concurrent write to *another* preference key doesn't
+     * clobber the in-progress edit when its Flow re-emits.
+     */
+    val isDraftDirty: Boolean = false,
 )

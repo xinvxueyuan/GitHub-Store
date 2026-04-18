@@ -29,10 +29,25 @@ data class TweaksState(
     val isScrollbarEnabled: Boolean = false,
     val isTelemetryEnabled: Boolean = false,
     val translationProvider: TranslationProvider = TranslationProvider.Default,
+    /**
+     * Transient UI-only selection used when the user picks a provider
+     * that needs more configuration before it can be activated (e.g.
+     * Youdao with missing credentials). Rendered as the "selected
+     * chip" when non-null; persisted [translationProvider] is the
+     * source of truth for what the app actually uses for translation.
+     * Cleared once the pending selection is either committed
+     * (credentials saved) or abandoned (another provider picked).
+     */
+    val draftTranslationProvider: TranslationProvider? = null,
     val youdaoAppKey: String = "",
     val youdaoAppSecret: String = "",
     val isYoudaoAppSecretVisible: Boolean = false,
 ) {
+    /** Effective provider to render as "selected" in the UI — draft
+     *  overrides persisted when a pending selection is in flight. */
+    val displayedTranslationProvider: TranslationProvider
+        get() = draftTranslationProvider ?: translationProvider
+
     /** Convenience accessor — returns a fresh default if the map is
      *  missing an entry for [scope]. The constructor seeds all scopes,
      *  but `copy(proxyForms = …)` call sites could in theory produce an

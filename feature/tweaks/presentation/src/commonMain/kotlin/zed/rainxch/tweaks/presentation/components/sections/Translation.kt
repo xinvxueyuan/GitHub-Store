@@ -104,13 +104,13 @@ private fun TranslationProviderCard(
             ) {
                 items(TranslationProvider.entries) { provider ->
                     FilterChip(
-                        selected = state.translationProvider == provider,
+                        selected = state.displayedTranslationProvider == provider,
                         onClick = { onAction(TweaksAction.OnTranslationProviderSelected(provider)) },
                         label = {
                             Text(
                                 text = providerLabel(provider),
                                 fontWeight =
-                                    if (state.translationProvider == provider) {
+                                    if (state.displayedTranslationProvider == provider) {
                                         FontWeight.Bold
                                     } else {
                                         FontWeight.Normal
@@ -126,7 +126,7 @@ private fun TranslationProviderCard(
             }
 
             AnimatedVisibility(
-                visible = state.translationProvider == TranslationProvider.YOUDAO,
+                visible = state.displayedTranslationProvider == TranslationProvider.YOUDAO,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut(),
             ) {

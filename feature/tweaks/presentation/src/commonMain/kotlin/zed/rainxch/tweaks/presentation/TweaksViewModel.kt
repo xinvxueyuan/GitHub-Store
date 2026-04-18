@@ -171,11 +171,20 @@ class TweaksViewModel(
         // Start one collector per scope. Each updates its slot in the
         // [TweaksState.proxyForms] map — scopes are independent so the
         // flows intentionally don't share state.
+        //
+        // If the user has an in-progress edit on a scope (isDraftDirty)
+        // we skip hydration for that scope until they commit (save) or
+        // reset (switch type via OnProxyTypeSelected for None/System).
+        // DataStore emits on *any* preference change — without this
+        // guard, toggling any unrelated setting while the user is mid-
+        // typing in the host field would snap the form back to persisted
+        // values.
         ProxyScope.entries.forEach { scope ->
             viewModelScope.launch {
                 proxyRepository.getProxyConfig(scope).collect { config ->
                     _state.update { state ->
                         val existing = state.formFor(scope)
+                        if (existing.isDraftDirty) return@update state
                         val populated =
                             existing.copy(
                                 type = ProxyType.fromConfig(config),
@@ -213,13 +222,29 @@ class TweaksViewModel(
         }
     }
 
+    /** User-triggered form edit — marks the scope dirty so the
+     *  preferences flow won't clobber the edit on an unrelated emit. */
     private fun mutateForm(
         scope: ProxyScope,
         block: (ProxyScopeFormState) -> ProxyScopeFormState,
     ) {
         _state.update { state ->
+            val updated = block(state.formFor(scope)).copy(isDraftDirty = true)
             state.copy(
-                proxyForms = state.proxyForms + (scope to block(state.formFor(scope))),
+                proxyForms = state.proxyForms + (scope to updated),
+            )
+        }
+    }
+
+    /** Clears the dirty flag — call after a successful save or an
+     *  explicit reset so the next preferences emission can re-hydrate
+     *  the form. */
+    private fun clearDirty(scope: ProxyScope) {
+        _state.update { state ->
+            val form = state.formFor(scope)
+            if (!form.isDraftDirty) return@update state
+            state.copy(
+                proxyForms = state.proxyForms + (scope to form.copy(isDraftDirty = false)),
             )
         }
     }
@@ -391,6 +416,9 @@ class TweaksViewModel(
                         runCatching {
                             proxyRepository.setProxyConfig(action.scope, config)
                         }.onSuccess {
+                            // Committed — allow preferences-flow hydration
+                            // to resume for this scope.
+                            clearDirty(action.scope)
                             _events.send(TweaksEvent.OnProxySaved)
                         }.onFailure { error ->
                             _events.send(
@@ -477,6 +505,7 @@ class TweaksViewModel(
                     runCatching {
                         proxyRepository.setProxyConfig(action.scope, config)
                     }.onSuccess {
+                        clearDirty(action.scope)
                         _events.send(TweaksEvent.OnProxySaved)
                     }.onFailure { error ->
                         _events.send(
@@ -615,12 +644,41 @@ class TweaksViewModel(
             }
 
             is TweaksAction.OnTranslationProviderSelected -> {
-                // Persist immediately — switching provider is a single-tap
-                // action, no credentials validation needed at this step
-                // (YOUDAO credentials are entered in the expanded form).
-                viewModelScope.launch {
-                    tweaksRepository.setTranslationProvider(action.provider)
-                    _events.send(TweaksEvent.OnTranslationProviderSaved)
+                when (action.provider) {
+                    TranslationProvider.GOOGLE -> {
+                        // No credentials required — persist immediately
+                        // and clear any pending draft selection.
+                        _state.update { it.copy(draftTranslationProvider = null) }
+                        viewModelScope.launch {
+                            tweaksRepository.setTranslationProvider(action.provider)
+                            _events.send(TweaksEvent.OnTranslationProviderSaved)
+                        }
+                    }
+                    TranslationProvider.YOUDAO -> {
+                        val current = _state.value
+                        val hasCreds =
+                            current.youdaoAppKey.isNotBlank() &&
+                                current.youdaoAppSecret.isNotBlank()
+                        if (hasCreds) {
+                            _state.update { it.copy(draftTranslationProvider = null) }
+                            viewModelScope.launch {
+                                tweaksRepository.setTranslationProvider(action.provider)
+                                _events.send(TweaksEvent.OnTranslationProviderSaved)
+                            }
+                        } else {
+                            // No credentials yet — expose the selection as
+                            // a draft so the UI expands the credentials
+                            // form, but don't commit to storage. If we
+                            // persisted here the next translation attempt
+                            // would fail with "not configured" and any
+                            // other repository that observes the flow
+                            // would snap back on the next re-emission.
+                            // Committed later from [OnYoudaoCredentialsSave].
+                            _state.update {
+                                it.copy(draftTranslationProvider = TranslationProvider.YOUDAO)
+                            }
+                        }
+                    }
                 }
             }
 
@@ -644,14 +702,24 @@ class TweaksViewModel(
                     tweaksRepository.setYoudaoAppKey(current.youdaoAppKey)
                     tweaksRepository.setYoudaoAppSecret(current.youdaoAppSecret)
                     // Auto-switch to YOUDAO when the user explicitly saves
-                    // credentials — saves them an extra tap and matches the
-                    // implicit intent ("I just configured this, use it").
-                    if (current.translationProvider != TranslationProvider.YOUDAO &&
+                    // credentials — saves them an extra tap and matches
+                    // the implicit intent ("I just configured this, use
+                    // it"). Also covers the "draft" case where the chip
+                    // was picked but not yet persisted because creds
+                    // were missing.
+                    val shouldActivate =
                         current.youdaoAppKey.isNotBlank() &&
-                        current.youdaoAppSecret.isNotBlank()
-                    ) {
+                            current.youdaoAppSecret.isNotBlank() &&
+                            (
+                                current.translationProvider != TranslationProvider.YOUDAO ||
+                                    current.draftTranslationProvider == TranslationProvider.YOUDAO
+                            )
+                    if (shouldActivate) {
                         tweaksRepository.setTranslationProvider(TranslationProvider.YOUDAO)
                     }
+                    // Drop any draft — either we committed it above or
+                    // the user emptied fields and cancelled implicitly.
+                    _state.update { it.copy(draftTranslationProvider = null) }
                     _events.send(TweaksEvent.OnYoudaoCredentialsSaved)
                 }
             }
