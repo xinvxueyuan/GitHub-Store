@@ -15,7 +15,7 @@ val detailsModule =
         single<DetailsRepository> {
             DetailsRepositoryImpl(
                 logger = get(),
-                httpClient = get(),
+                clientProvider = get(),
                 backendApiClient = get(),
                 localizationManager = get(),
                 cacheManager = get(),
@@ -25,6 +25,7 @@ val detailsModule =
         single<TranslationRepository> {
             TranslationRepositoryImpl(
                 localizationManager = get(),
+                clientProvider = get(),
             )
         }
 

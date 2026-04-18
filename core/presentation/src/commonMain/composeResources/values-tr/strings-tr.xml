@@ -423,6 +423,13 @@
     <string name="proxy_test_error_auth_required">Proxy kimlik doğrulaması gerekiyor.</string>
     <string name="proxy_test_error_status">Beklenmeyen yanıt: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">Bağlantı testi başarısız</string>
+    <string name="proxy_scope_intro">Her kategori kendi proxy\'sini kullanabilir. Bunları bağımsız olarak yapılandırın.</string>
+    <string name="proxy_scope_discovery_title">Keşif (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">Ana sayfa, arama, depo ayrıntıları ve güncelleme denetimleri</string>
+    <string name="proxy_scope_download_title">İndirmeler</string>
+    <string name="proxy_scope_download_description">APK indirmeleri ve otomatik güncellemeler</string>
+    <string name="proxy_scope_translation_title">Çeviri</string>
+    <string name="proxy_scope_translation_description">README çeviri hizmeti</string>
 
 
     <!-- Track app feature -->
@@ -619,7 +626,7 @@
     <string name="seen_badge">Görüntülendi</string>
     <string name="privacy_section">Gizlilik</string>
     <string name="telemetry_title">Aramayı iyileştirmeye yardım et</string>
-    <string name="telemetry_description">Önerileri iyileştirmek için anonim kullanım verilerini (aramalar, yüklemeler) paylaş. Kişisel bilgi toplanmaz.</string>
+    <string name="telemetry_description">Sıfırlanabilir bir analiz kimliğine bağlı anonimleştirilmiş kullanım verilerini (aramalar, yüklemeler, etkileşimler) paylaş. Hesap ayrıntıları paylaşılmaz.</string>
     <string name="reset_analytics_id_title">Analitik kimliğini sıfırla</string>
     <string name="reset_analytics_id_description">Yeni anonim kimlik oluştur, geçmiş telemetri ile bağı kopar.</string>
     <string name="analytics_id_reset">Analitik kimliği sıfırlandı</string>

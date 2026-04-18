@@ -10,7 +10,7 @@ val settingsModule =
             ProfileRepositoryImpl(
                 authenticationState = get(),
                 tokenStore = get(),
-                httpClient = get(),
+                clientProvider = get(),
                 cacheManager = get(),
                 logger = get(),
                 fileLocationsProvider = get(),

@@ -391,6 +391,13 @@
     <string name="proxy_test_error_auth_required">Authentification proxy requise.</string>
     <string name="proxy_test_error_status">Réponse inattendue : HTTP %1$d</string>
     <string name="proxy_test_error_unknown">Échec du test de connexion</string>
+    <string name="proxy_scope_intro">Chaque catégorie peut utiliser son propre proxy. Configurez-les indépendamment.</string>
+    <string name="proxy_scope_discovery_title">Découverte (API GitHub)</string>
+    <string name="proxy_scope_discovery_description">Accueil, recherche, détails du dépôt et vérifications de mise à jour</string>
+    <string name="proxy_scope_download_title">Téléchargements</string>
+    <string name="proxy_scope_download_description">Téléchargements APK et mises à jour automatiques</string>
+    <string name="proxy_scope_translation_title">Traduction</string>
+    <string name="proxy_scope_translation_description">Service de traduction du README</string>
 
 
     <!-- Track app feature -->
@@ -583,7 +590,7 @@
     <string name="seen_badge">Consulté</string>
     <string name="privacy_section">Confidentialité</string>
     <string name="telemetry_title">Aider à améliorer la recherche</string>
-    <string name="telemetry_description">Partager des données d\'utilisation anonymes (recherches, installations) pour améliorer les recommandations. Aucune information personnelle n\'est collectée.</string>
+    <string name="telemetry_description">Partager des données d\'utilisation anonymisées (recherches, installations, interactions) liées à un identifiant d\'analyse réinitialisable. Aucun détail de compte n\'est partagé.</string>
     <string name="reset_analytics_id_title">Réinitialiser l\'ID d\'analytique</string>
     <string name="reset_analytics_id_description">Générer un nouvel ID anonyme, coupant le lien avec la télémétrie passée.</string>
     <string name="analytics_id_reset">ID d\'analytique réinitialisé</string>

@@ -1,6 +1,5 @@
 package zed.rainxch.core.data.di
 
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,7 +24,7 @@ import zed.rainxch.core.data.network.BackendApiClient
 import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.data.network.ProxyManager
 import zed.rainxch.core.data.network.ProxyTesterImpl
-import zed.rainxch.core.data.network.createGitHubHttpClient
+import zed.rainxch.core.data.network.TranslationClientProvider
 import zed.rainxch.core.data.repository.AuthenticationStateImpl
 import zed.rainxch.core.data.repository.FavouritesRepositoryImpl
 import zed.rainxch.core.data.repository.InstalledAppsRepositoryImpl
@@ -41,6 +40,7 @@ import zed.rainxch.core.domain.getPlatform
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
 import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.model.ProxyScope
 import zed.rainxch.core.domain.network.ProxyTester
 import zed.rainxch.core.domain.system.DownloadOrchestrator
 import zed.rainxch.core.domain.repository.AuthenticationState
@@ -89,7 +89,7 @@ val coreModule =
                 installedAppsDao = get(),
                 historyDao = get(),
                 installer = get(),
-                httpClient = get(),
+                clientProvider = get(),
             )
         }
 
@@ -98,7 +98,7 @@ val coreModule =
                 installedAppsDao = get(),
                 starredRepoDao = get(),
                 platform = get(),
-                httpClient = get(),
+                clientProvider = get(),
             )
         }
 
@@ -144,7 +144,9 @@ val coreModule =
         }
 
         single<BackendApiClient> {
-            BackendApiClient()
+            BackendApiClient(
+                proxyConfigFlow = ProxyManager.configFlow(ProxyScope.DISCOVERY),
+            )
         }
 
         single<DeviceIdentityRepository> {
@@ -180,58 +182,37 @@ val coreModule =
 
 val networkModule =
     module {
-        single<GitHubClientProvider> {
-            val config =
-                runBlocking {
-                    runCatching {
-                        withTimeout(1_500L) {
-                            get<ProxyRepository>().getProxyConfig().first()
-                        }
-                    }.getOrDefault(ProxyConfig.System)
-                }
-
-            when (config) {
-                is ProxyConfig.None -> {
-                    ProxyManager.setNoProxy()
-                }
-
-                is ProxyConfig.System -> {
-                    ProxyManager.setSystemProxy()
-                }
-
-                is ProxyConfig.Http -> {
-                    ProxyManager.setHttpProxy(
-                        host = config.host,
-                        port = config.port,
-                        username = config.username,
-                        password = config.password,
-                    )
-                }
-
-                is ProxyConfig.Socks -> {
-                    ProxyManager.setSocksProxy(
-                        host = config.host,
-                        port = config.port,
-                        username = config.username,
-                        password = config.password,
-                    )
-                }
+        // Seed ProxyManager from persisted per-scope configs *before* any
+        // HTTP client is constructed. Blocks briefly (≤1.5s per scope) on
+        // DataStore reads so the very first request uses the user's saved
+        // proxy rather than the System default. Failures are swallowed and
+        // fall back to System — we'd rather network work than the app stall
+        // on startup if DataStore is slow.
+        single<GitHubClientProvider>(createdAtStart = true) {
+            val repository = get<ProxyRepository>()
+            ProxyScope.entries.forEach { scope ->
+                val saved =
+                    runBlocking {
+                        runCatching {
+                            withTimeout(1_500L) {
+                                repository.getProxyConfig(scope).first()
+                            }
+                        }.getOrDefault(ProxyConfig.System)
+                    }
+                ProxyManager.setConfig(scope, saved)
             }
 
             GitHubClientProvider(
                 tokenStore = get(),
                 rateLimitRepository = get(),
                 authenticationState = get(),
-                proxyConfigFlow = ProxyManager.currentProxyConfig,
+                proxyConfigFlow = ProxyManager.configFlow(ProxyScope.DISCOVERY),
             )
         }
 
-        single<HttpClient> {
-            createGitHubHttpClient(
-                tokenStore = get(),
-                rateLimitRepository = get(),
-                authenticationState = get(),
-                scope = get(),
+        single<TranslationClientProvider>(createdAtStart = true) {
+            TranslationClientProvider(
+                proxyConfigFlow = ProxyManager.configFlow(ProxyScope.TRANSLATION),
             )
         }
 

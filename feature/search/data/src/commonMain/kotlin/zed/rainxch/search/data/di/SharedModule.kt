@@ -9,7 +9,7 @@ val searchModule =
     module {
         single<SearchRepository> {
             SearchRepositoryImpl(
-                httpClient = get(),
+                clientProvider = get(),
                 backendApiClient = get(),
                 cacheManager = get(),
             )

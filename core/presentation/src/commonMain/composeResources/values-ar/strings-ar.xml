@@ -158,6 +158,13 @@
     <string name="proxy_test_error_auth_required">يلزم التحقق من الوكيل.</string>
     <string name="proxy_test_error_status">استجابة غير متوقعة: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">فشل اختبار الاتصال</string>
+    <string name="proxy_scope_intro">يمكن لكل فئة استخدام البروكسي الخاص بها. قم بتكوينها بشكل مستقل.</string>
+    <string name="proxy_scope_discovery_title">الاكتشاف (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">الصفحة الرئيسية والبحث وتفاصيل المستودع وفحوصات التحديث</string>
+    <string name="proxy_scope_download_title">التنزيلات</string>
+    <string name="proxy_scope_download_description">تنزيلات APK والتحديثات التلقائية</string>
+    <string name="proxy_scope_translation_title">الترجمة</string>
+    <string name="proxy_scope_translation_description">خدمة ترجمة README</string>
 
     <!-- Snackbar -->
     <string name="logout_success">تم تسجيل الخروج بنجاح، جارٍ إعادة التوجيه...</string>
@@ -622,7 +629,7 @@
     <string name="seen_badge">تمت المشاهدة</string>
     <string name="privacy_section">الخصوصية</string>
     <string name="telemetry_title">ساعد في تحسين البحث</string>
-    <string name="telemetry_description">مشاركة بيانات الاستخدام المجهولة (عمليات البحث، التثبيتات) لتحسين التوصيات. لا يتم جمع أي معلومات شخصية.</string>
+    <string name="telemetry_description">مشاركة بيانات الاستخدام المجهولة الهوية (عمليات البحث والتثبيتات والتفاعلات) المرتبطة بمعرّف تحليلي قابل لإعادة التعيين. لا تتم مشاركة تفاصيل الحساب.</string>
     <string name="reset_analytics_id_title">إعادة تعيين معرف التحليلات</string>
     <string name="reset_analytics_id_description">إنشاء معرف مجهول جديد، مما يقطع الصلة بالبيانات السابقة.</string>
     <string name="analytics_id_reset">تم إعادة تعيين معرف التحليلات</string>

@@ -392,6 +392,13 @@
     <string name="proxy_test_error_auth_required">需要代理身份验证。</string>
     <string name="proxy_test_error_status">意外响应：HTTP %1$d</string>
     <string name="proxy_test_error_unknown">连接测试失败</string>
+    <string name="proxy_scope_intro">每个类别都可以使用自己的代理。请独立配置它们。</string>
+    <string name="proxy_scope_discovery_title">发现 (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">主页、搜索、仓库详情和更新检查</string>
+    <string name="proxy_scope_download_title">下载</string>
+    <string name="proxy_scope_download_description">APK 下载和自动更新</string>
+    <string name="proxy_scope_translation_title">翻译</string>
+    <string name="proxy_scope_translation_description">README 翻译服务</string>
 
 
     <!-- Track app feature -->
@@ -585,7 +592,7 @@
     <string name="seen_badge">已浏览</string>
     <string name="privacy_section">隐私</string>
     <string name="telemetry_title">帮助改进搜索</string>
-    <string name="telemetry_description">分享匿名使用数据（搜索、安装）以改进推荐。不收集任何个人信息。</string>
+    <string name="telemetry_description">分享与可重置分析 ID 关联的匿名使用数据（搜索、安装、交互）。不分享账户详情。</string>
     <string name="reset_analytics_id_title">重置分析 ID</string>
     <string name="reset_analytics_id_description">生成新的匿名 ID，切断与过去遥测数据的联系。</string>
     <string name="analytics_id_reset">分析 ID 已重置</string>

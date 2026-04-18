@@ -425,6 +425,13 @@
     <string name="proxy_test_error_auth_required">प्रॉक्सी प्रमाणीकरण आवश्यक है।</string>
     <string name="proxy_test_error_status">अप्रत्याशित प्रतिक्रिया: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">कनेक्शन परीक्षण विफल</string>
+    <string name="proxy_scope_intro">प्रत्येक श्रेणी अपना प्रॉक्सी उपयोग कर सकती है। उन्हें स्वतंत्र रूप से कॉन्फ़िगर करें।</string>
+    <string name="proxy_scope_discovery_title">खोज (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">होम, खोज, रेपो विवरण और अपडेट जांच</string>
+    <string name="proxy_scope_download_title">डाउनलोड</string>
+    <string name="proxy_scope_download_description">APK डाउनलोड और स्वचालित अपडेट</string>
+    <string name="proxy_scope_translation_title">अनुवाद</string>
+    <string name="proxy_scope_translation_description">README अनुवाद सेवा</string>
 
 
     <!-- Track app feature -->
@@ -620,7 +627,7 @@
     <string name="seen_badge">देखा गया</string>
     <string name="privacy_section">गोपनीयता</string>
     <string name="telemetry_title">खोज को बेहतर बनाने में मदद करें</string>
-    <string name="telemetry_description">सुझाव बेहतर बनाने के लिए अनाम उपयोग डेटा (खोज, इंस्टॉल) साझा करें। कोई व्यक्तिगत जानकारी नहीं एकत्र की जाती।</string>
+    <string name="telemetry_description">रीसेट करने योग्य एनालिटिक्स आईडी से जुड़े अनाम उपयोग डेटा (खोज, इंस्टॉल, इंटरैक्शन) साझा करें। खाता विवरण साझा नहीं किए जाते।</string>
     <string name="reset_analytics_id_title">एनालिटिक्स आईडी रीसेट करें</string>
     <string name="reset_analytics_id_description">एक नया अनाम आईडी बनाएं, पिछले टेलीमेट्री से लिंक को तोड़ें।</string>
     <string name="analytics_id_reset">एनालिटिक्स आईडी रीसेट किया गया</string>

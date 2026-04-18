@@ -3,8 +3,9 @@ package zed.rainxch.tweaks.presentation
 import zed.rainxch.core.domain.model.AppTheme
 import zed.rainxch.core.domain.model.FontTheme
 import zed.rainxch.core.domain.model.InstallerType
+import zed.rainxch.core.domain.model.ProxyScope
 import zed.rainxch.core.domain.model.ShizukuAvailability
-import zed.rainxch.tweaks.presentation.model.ProxyType
+import zed.rainxch.tweaks.presentation.model.ProxyScopeFormState
 
 data class TweaksState(
     val selectedThemeColor: AppTheme = AppTheme.OCEAN,
@@ -12,13 +13,8 @@ data class TweaksState(
     val isAmoledThemeEnabled: Boolean = false,
     val isDarkTheme: Boolean? = null,
     val versionName: String = "",
-    val proxyType: ProxyType = ProxyType.NONE,
-    val proxyHost: String = "",
-    val proxyPort: String = "",
-    val proxyUsername: String = "",
-    val proxyPassword: String = "",
-    val isProxyPasswordVisible: Boolean = false,
-    val isProxyTestInProgress: Boolean = false,
+    val proxyForms: Map<ProxyScope, ProxyScopeFormState> =
+        ProxyScope.entries.associateWith { ProxyScopeFormState() },
     val autoDetectClipboardLinks: Boolean = true,
     val cacheSize: String = "",
     val isClearDownloadsDialogVisible: Boolean = false,
@@ -31,4 +27,8 @@ data class TweaksState(
     val isHideSeenEnabled: Boolean = false,
     val isScrollbarEnabled: Boolean = false,
     val isTelemetryEnabled: Boolean = false,
-)
+) {
+    /** Convenience accessor — guaranteed non-null because the map is
+     *  seeded with entries for every [ProxyScope] at construction time. */
+    fun formFor(scope: ProxyScope): ProxyScopeFormState = proxyForms.getValue(scope)
+}

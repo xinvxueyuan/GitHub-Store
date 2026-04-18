@@ -161,6 +161,13 @@
     <string name="proxy_test_error_auth_required">Proxy authentication required.</string>
     <string name="proxy_test_error_status">Unexpected response: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">Connection test failed</string>
+    <string name="proxy_scope_intro">Each category can use its own proxy. Configure them independently.</string>
+    <string name="proxy_scope_discovery_title">Discovery (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">Home, search, repo details, and update checks</string>
+    <string name="proxy_scope_download_title">Downloads</string>
+    <string name="proxy_scope_download_description">APK downloads and auto-updates</string>
+    <string name="proxy_scope_translation_title">Translation</string>
+    <string name="proxy_scope_translation_description">README translation service</string>
 
     <!-- Snackbar -->
     <string name="logout_success">Logged out successfully, redirecting...</string>
@@ -641,7 +648,7 @@
     <!-- Privacy / telemetry -->
     <string name="privacy_section">Privacy</string>
     <string name="telemetry_title">Help improve search</string>
-    <string name="telemetry_description">Share anonymous usage data (searches, installs) so we can improve recommendations. No personal information is collected.</string>
+    <string name="telemetry_description">Share anonymized usage data (searches, installs, interactions) tied to a resettable analytics ID. No account details are shared.</string>
     <string name="reset_analytics_id_title">Reset analytics ID</string>
     <string name="reset_analytics_id_description">Generate a new anonymous ID, severing the link to past telemetry.</string>
     <string name="analytics_id_reset">Analytics ID reset</string>

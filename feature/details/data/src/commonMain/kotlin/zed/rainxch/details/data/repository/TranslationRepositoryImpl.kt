@@ -9,9 +9,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
-import zed.rainxch.core.data.network.createPlatformHttpClient
+import zed.rainxch.core.data.network.TranslationClientProvider
 import zed.rainxch.core.data.services.LocalizationManager
-import zed.rainxch.core.domain.model.ProxyConfig
 import zed.rainxch.details.domain.model.TranslationResult
 import zed.rainxch.details.domain.repository.TranslationRepository
 import kotlin.time.Clock
@@ -19,8 +18,9 @@ import kotlin.time.ExperimentalTime
 
 class TranslationRepositoryImpl(
     private val localizationManager: LocalizationManager,
+    private val clientProvider: TranslationClientProvider,
 ) : TranslationRepository {
-    private val httpClient: HttpClient = createPlatformHttpClient(ProxyConfig.None)
+    private val httpClient: HttpClient get() = clientProvider.client
 
     private val json =
         Json {
