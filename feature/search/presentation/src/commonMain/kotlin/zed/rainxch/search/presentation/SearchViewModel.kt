@@ -39,7 +39,6 @@ import zed.rainxch.githubstore.core.presentation.res.failed_to_share_link
 import zed.rainxch.githubstore.core.presentation.res.link_copied_to_clipboard
 import zed.rainxch.githubstore.core.presentation.res.no_github_link_in_clipboard
 import zed.rainxch.githubstore.core.presentation.res.explore_error
-import zed.rainxch.githubstore.core.presentation.res.no_repositories_found
 import zed.rainxch.githubstore.core.presentation.res.search_failed
 import zed.rainxch.search.presentation.mappers.toDomain
 import zed.rainxch.search.presentation.utils.isEntirelyGithubUrls
@@ -65,6 +64,8 @@ class SearchViewModel(
     private var currentPage = 1
     private var explorePage = 1
     private var lastExploreQuery = ""
+
+    private val exploreLog = logger.withTag("SearchExplore")
 
     companion object {
         private const val MIN_QUERY_LENGTH = 3
@@ -295,7 +296,12 @@ class SearchViewModel(
             currentPage = 1
             explorePage = 1
             lastExploreQuery = query
-            _state.update { it.copy(exploreStatus = SearchState.ExploreStatus.IDLE) }
+            _state.update {
+                it.copy(
+                    exploreStatus = SearchState.ExploreStatus.IDLE,
+                    passthroughAttempted = null,
+                )
+            }
         }
 
         currentSearchJob =
@@ -312,6 +318,8 @@ class SearchViewModel(
                                 it.repositories
                             },
                         totalCount = if (isInitial) null else it.totalCount,
+                        passthroughAttempted =
+                            if (isInitial) null else it.passthroughAttempted,
                     )
                 }
 
@@ -390,12 +398,8 @@ class SearchViewModel(
                                     repositories = allRepos,
                                     hasMorePages = paginatedRepos.hasMore,
                                     totalCount = allRepos.size,
-                                    errorMessage =
-                                        if (allRepos.isEmpty() && !paginatedRepos.hasMore) {
-                                            getString(Res.string.no_repositories_found)
-                                        } else {
-                                            null
-                                        },
+                                    errorMessage = null,
+                                    passthroughAttempted = paginatedRepos.passthroughAttempted,
                                 )
                             }
                         }
@@ -682,10 +686,27 @@ class SearchViewModel(
 
     private fun performExplore() {
         val query = _state.value.query.trim()
-        if (query.isBlank() || _state.value.exploreStatus == SearchState.ExploreStatus.LOADING) return
+        val platformUi = _state.value.selectedSearchPlatform
+        val prevStatus = _state.value.exploreStatus
 
-        // Reset page if query changed
+        exploreLog.debug(
+            "click: query='$query' platform=$platformUi " +
+                "page=$explorePage lastQuery='$lastExploreQuery' status=$prevStatus",
+        )
+
+        if (query.isBlank()) {
+            exploreLog.debug("skipped: query is blank")
+            return
+        }
+        if (prevStatus == SearchState.ExploreStatus.LOADING) {
+            exploreLog.debug("skipped: already LOADING")
+            return
+        }
+
         if (query != lastExploreQuery) {
+            exploreLog.debug(
+                "query changed ('$lastExploreQuery' -> '$query'); resetting page to 1",
+            )
             explorePage = 1
             lastExploreQuery = query
         }
@@ -696,24 +717,40 @@ class SearchViewModel(
             try {
                 val exploreResult = searchRepository.exploreFromGithub(
                     query = query,
-                    platform = _state.value.selectedSearchPlatform.toDomain(),
+                    platform = platformUi.toDomain(),
                     page = explorePage,
                 )
+                val existingCount = _state.value.repositories.size
+                exploreLog.debug(
+                    "response: items=${exploreResult.repos.size} " +
+                        "returnedPage=${exploreResult.page} hasMore=${exploreResult.hasMore} " +
+                        "existingVisible=$existingCount",
+                )
 
-                if (exploreResult.repos.isEmpty() || !exploreResult.hasMore) {
-                    if (exploreResult.repos.isNotEmpty()) {
-                        appendExploreResults(exploreResult.repos)
-                    }
-                    _state.update { it.copy(exploreStatus = SearchState.ExploreStatus.EXHAUSTED) }
-                } else {
+                val before = _state.value.repositories.size
+                if (exploreResult.repos.isNotEmpty()) {
                     appendExploreResults(exploreResult.repos)
+                }
+                val added = _state.value.repositories.size - before
+                val dupes = exploreResult.repos.size - added
+
+                if (exploreResult.hasMore) {
                     explorePage++
+                    exploreLog.debug(
+                        "-> IDLE: appended=$added dupes=$dupes nextPage=$explorePage",
+                    )
                     _state.update { it.copy(exploreStatus = SearchState.ExploreStatus.IDLE) }
+                } else {
+                    exploreLog.debug(
+                        "-> EXHAUSTED: appended=$added dupes=$dupes " +
+                            "rawItems=${exploreResult.repos.size}",
+                    )
+                    _state.update { it.copy(exploreStatus = SearchState.ExploreStatus.EXHAUSTED) }
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                logger.error("Explore failed: ${e.message}")
+                exploreLog.error("failed: ${e::class.simpleName}: ${e.message}", e)
                 _state.update { it.copy(exploreStatus = SearchState.ExploreStatus.IDLE) }
                 _events.send(SearchEvent.OnMessage(getString(Res.string.explore_error)))
             }

@@ -541,6 +541,35 @@ fun SearchScreen(
                     }
                 }
 
+                if (!state.isLoading &&
+                    !state.isLoadingMore &&
+                    state.errorMessage == null &&
+                    state.repositories.isEmpty() &&
+                    state.query.isNotBlank() &&
+                    !state.hasMorePages
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = stringResource(Res.string.no_repositories_found))
+
+                            // Backend already did its own passthrough and still found
+                            // nothing — don't tease a manual explore that would just
+                            // redo the same work. Any other case (false / null for
+                            // older backends) keeps the CTA.
+                            if (state.passthroughAttempted != true) {
+                                Spacer(Modifier.height(8.dp))
+                                ExploreFromGithubButton(
+                                    status = state.exploreStatus,
+                                    onExplore = { onAction(SearchAction.ExploreFromGithub) },
+                                )
+                            }
+                        }
+                    }
+                }
+
                 if (state.visibleRepos.isNotEmpty()) {
                     val isScrollbarEnabled = LocalScrollbarEnabled.current
                     ScrollbarContainer(

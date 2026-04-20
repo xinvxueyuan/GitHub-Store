@@ -33,6 +33,7 @@ data class SearchState(
     val autoDetectClipboardEnabled: Boolean = true,
     val recentSearches: ImmutableList<String> = persistentListOf(),
     val exploreStatus: ExploreStatus = ExploreStatus.IDLE,
+    val passthroughAttempted: Boolean? = null,
 ) {
     enum class ExploreStatus {
         IDLE,

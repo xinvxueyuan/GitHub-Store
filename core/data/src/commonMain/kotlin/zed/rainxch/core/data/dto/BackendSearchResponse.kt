@@ -8,4 +8,5 @@ data class BackendSearchResponse(
     val totalHits: Int,
     val processingTimeMs: Int,
     val source: String? = null,
+    val passthroughAttempted: Boolean? = null,
 )

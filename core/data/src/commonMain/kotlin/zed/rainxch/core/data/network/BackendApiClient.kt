@@ -140,7 +140,12 @@ class BackendApiClient(
                 parameter("q", query)
                 if (platform != null) parameter("platform", platform)
                 parameter("page", page)
-                timeout { requestTimeoutMillis = 20_000 }
+
+                timeout {
+                    requestTimeoutMillis = 30_000
+                    socketTimeoutMillis = 30_000
+                }
+
                 if (token != null) header(X_GITHUB_TOKEN_HEADER, token)
             }
             if (response.status.isSuccess()) {

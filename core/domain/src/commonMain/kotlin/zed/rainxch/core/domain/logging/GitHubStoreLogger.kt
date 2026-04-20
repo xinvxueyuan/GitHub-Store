@@ -11,4 +11,6 @@ interface GitHubStoreLogger {
         message: String,
         throwable: Throwable? = null,
     )
+
+    fun withTag(tag: String): GitHubStoreLogger = this
 }

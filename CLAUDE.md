@@ -158,6 +158,8 @@ Custom Gradle plugins in `build-logic/convention/` standardize module setup:
 - **Shizuku (Android):** Optional silent install via `ShizukuProvider` (registered in AndroidManifest). Requires Shizuku app running with ADB or root. AIDL service passes APK via `ParcelFileDescriptor` to `pm install -S`. Falls back to standard installer on failure.
 - **Gradle properties:** Config cache enabled, build cache enabled, 4GB Gradle heap, 3GB Kotlin daemon heap
 - **Code style:** Official Kotlin style (`kotlin.code.style=official`)
+- **Desktop logs:** `CrashReporter` (installed as the first line of `DesktopApp.main`) tees `System.out`/`System.err` to a rotating `session.log` and writes `crash-<timestamp>.log` on uncaught exceptions. Paths: `~/Library/Logs/GitHub-Store/` (macOS), `%LOCALAPPDATA%/GitHub-Store/logs/` (Windows), `$XDG_STATE_HOME/GitHub-Store/logs/` (Linux). Android uses Logcat — no CrashReporter.
+- **`X-GitHub-Token` header:** Forwarded to the backend *only* on `/v1/search` and `/v1/search/explore` (so the backend's live GitHub passthrough runs under the user's own 5000/hr quota). Sourced from `TokenStore.currentToken()` via `BackendApiClient.currentUserGithubToken()` — the helper is `private` so other endpoints can't leak it accidentally. Never sent on other endpoints (`/v1/categories`, `/v1/topics`, `/v1/repo`, `/v1/events`), never logged (no Ktor `Logging` plugin installed).
 
 ## Coding Conventions
 

@@ -8,4 +8,5 @@ data class PaginatedDiscoveryRepositories(
     val hasMore: Boolean,
     val nextPageIndex: Int,
     val totalCount: Int? = null,
+    val passthroughAttempted: Boolean? = null,
 )
