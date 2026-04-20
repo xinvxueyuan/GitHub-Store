@@ -151,10 +151,13 @@ class BackendApiClient(
         }
 
     private suspend fun currentUserGithubToken(): String? =
-        runCatching { tokenStore.currentToken()?.accessToken?.trim() }
-            .getOrNull()
-            ?.takeIf { it.isNotEmpty() }
-
+        try {
+            tokenStore.currentToken()?.accessToken?.trim()?.takeIf { it.isNotEmpty() }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
+        }
     suspend fun getRepo(owner: String, name: String): Result<BackendRepoResponse> =
         safeCall {
             val response = httpClient.get("repo/$owner/$name")
