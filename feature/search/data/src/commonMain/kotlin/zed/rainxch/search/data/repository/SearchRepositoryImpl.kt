@@ -147,6 +147,7 @@ class SearchRepositoryImpl(
                 hasMore = hasMore,
                 nextPageIndex = page + 1,
                 totalCount = searchResponse.totalHits,
+                passthroughAttempted = searchResponse.passthroughAttempted,
             )
         }
     }
