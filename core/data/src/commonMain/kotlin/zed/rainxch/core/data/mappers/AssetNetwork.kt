@@ -12,11 +12,13 @@ fun AssetNetwork.toDomain(): GithubAsset =
         size = size,
         downloadUrl = downloadUrl,
         uploader =
-            GithubUser(
-                id = uploader.id,
-                login = uploader.login,
-                avatarUrl = uploader.avatarUrl,
-                htmlUrl = uploader.htmlUrl,
-            ),
+            uploader?.let {
+                GithubUser(
+                    id = it.id,
+                    login = it.login,
+                    avatarUrl = it.avatarUrl,
+                    htmlUrl = it.htmlUrl,
+                )
+            },
         downloadCount = downloadCount,
     )

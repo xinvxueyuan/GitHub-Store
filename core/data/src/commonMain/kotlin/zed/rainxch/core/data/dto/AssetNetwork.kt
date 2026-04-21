@@ -10,6 +10,6 @@ data class AssetNetwork(
     @SerialName("content_type") val contentType: String,
     @SerialName("size") val size: Long,
     @SerialName("browser_download_url") val downloadUrl: String,
-    @SerialName("uploader") val uploader: OwnerNetwork,
+    @SerialName("uploader") val uploader: OwnerNetwork? = null,
     @SerialName("download_count") val downloadCount: Long = 0,
 )

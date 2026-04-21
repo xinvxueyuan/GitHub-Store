@@ -6,5 +6,5 @@ data class GithubAssetUi(
     val contentType: String,
     val size: Long,
     val downloadUrl: String,
-    val uploader: GithubUserUi,
+    val uploader: GithubUserUi? = null,
 )

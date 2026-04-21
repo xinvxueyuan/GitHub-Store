@@ -11,11 +11,13 @@ fun GithubAsset.toUi(): GithubAssetUi {
         contentType = contentType,
         size = size,
         downloadUrl = downloadUrl,
-        uploader = GithubUserUi(
-            id = uploader.id,
-            login = uploader.login,
-            avatarUrl = uploader.avatarUrl,
-            htmlUrl = uploader.htmlUrl,
-        ),
+        uploader = uploader?.let {
+            GithubUserUi(
+                id = it.id,
+                login = it.login,
+                avatarUrl = it.avatarUrl,
+                htmlUrl = it.htmlUrl,
+            )
+        },
     )
 }
