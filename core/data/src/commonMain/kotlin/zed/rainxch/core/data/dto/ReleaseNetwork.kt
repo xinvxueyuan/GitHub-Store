@@ -10,7 +10,7 @@ data class ReleaseNetwork(
     @SerialName("name") val name: String? = null,
     @SerialName("draft") val draft: Boolean? = null,
     @SerialName("prerelease") val prerelease: Boolean? = null,
-    @SerialName("author") val author: OwnerNetwork,
+    @SerialName("author") val author: OwnerNetwork? = null,
     @SerialName("published_at") val publishedAt: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("body") val body: String? = null,

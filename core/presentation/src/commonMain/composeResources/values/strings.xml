@@ -213,6 +213,10 @@
     <string name="installed">Installed</string>
     <string name="update_available">Update available</string>
     <string name="not_available">Not available</string>
+    <string name="releases_load_failed">Couldn\'t load releases</string>
+    <string name="releases_load_failed_description">Check your connection and try again.</string>
+    <string name="no_releases_published">No releases published yet</string>
+    <string name="loading_releases">Loading releases…</string>
     <string name="install_latest">Install latest</string>
     <string name="reinstall">Reinstall</string>
     <string name="update_app">Update app</string>

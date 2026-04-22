@@ -7,7 +7,7 @@ data class GithubRelease(
     val id: Long,
     val tagName: String,
     val name: String?,
-    val author: GithubUser,
+    val author: GithubUser? = null,
     val publishedAt: String,
     val description: String?,
     val assets: List<GithubAsset>,

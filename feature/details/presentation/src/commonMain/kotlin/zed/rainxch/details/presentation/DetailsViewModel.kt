@@ -167,6 +167,8 @@ class DetailsViewModel(
                 loadInitial()
             }
 
+            DetailsAction.RetryReleases -> retryReleases()
+
             DetailsAction.OnDismissDowngradeWarning -> {
                 dismissDowngradeWarning()
             }
@@ -504,6 +506,62 @@ class DetailsViewModel(
 
     private fun observeLiquidGlassEnabled() {
         viewModelScope.launch {
+        }
+    }
+
+    private fun retryReleases() {
+        val repo = _state.value.repository ?: return
+        if (_state.value.isRetryingReleases) return
+        viewModelScope.launch {
+            val prevCategory = _state.value.selectedReleaseCategory
+            _state.update { it.copy(isRetryingReleases = true, releasesLoadFailed = false) }
+            try {
+                val releases =
+                    detailsRepository.getAllReleases(
+                        owner = repo.owner.login,
+                        repo = repo.name,
+                        defaultBranch = repo.defaultBranch,
+                    )
+                // Prefer a release that matches the user's previous category.
+                // Only fall back to the generic "first stable, else first" rule
+                // when no release exists in that category — in which case reset
+                // the category too so the UI doesn't end up with a category
+                // selected but no matching release.
+                val byPrevCategory = when (prevCategory) {
+                    ReleaseCategory.STABLE -> releases.firstOrNull { !it.isPrerelease }
+                    ReleaseCategory.PRE_RELEASE -> releases.firstOrNull { it.isPrerelease }
+                    ReleaseCategory.ALL -> releases.firstOrNull()
+                }
+                val selected = byPrevCategory
+                    ?: releases.firstOrNull { !it.isPrerelease }
+                    ?: releases.firstOrNull()
+                val resolvedCategory =
+                    if (byPrevCategory != null) prevCategory else ReleaseCategory.STABLE
+                val (installable, primary) =
+                    recomputeAssetsForRelease(selected, _state.value.installedApp)
+                _state.update {
+                    it.copy(
+                        allReleases = releases,
+                        releasesLoadFailed = false,
+                        isRetryingReleases = false,
+                        selectedRelease = selected,
+                        selectedReleaseCategory = resolvedCategory,
+                        installableAssets = installable,
+                        primaryAsset = primary,
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: RateLimitException) {
+                _state.update {
+                    it.copy(isRetryingReleases = false, releasesLoadFailed = true)
+                }
+            } catch (t: Throwable) {
+                logger.warn("Retry failed to load releases: ${t.message}")
+                _state.update {
+                    it.copy(isRetryingReleases = false, releasesLoadFailed = true)
+                }
+            }
         }
     }
 
@@ -1951,13 +2009,13 @@ class DetailsViewModel(
                                 owner = owner,
                                 repo = name,
                                 defaultBranch = repo.defaultBranch,
-                            )
+                            ) to false
                         } catch (_: RateLimitException) {
                             rateLimited.set(true)
-                            emptyList()
+                            emptyList<GithubRelease>() to true
                         } catch (t: Throwable) {
                             logger.warn("Failed to load releases: ${t.message}")
-                            emptyList()
+                            emptyList<GithubRelease>() to true
                         }
                     }
 
@@ -2034,14 +2092,24 @@ class DetailsViewModel(
                 val isObtainiumEnabled = platform == Platform.ANDROID
                 val isAppManagerEnabled = platform == Platform.ANDROID
 
-                val allReleases = allReleasesDeferred.await()
+                val (allReleases, releasesFailed) = allReleasesDeferred.await()
                 val stats = statsDeferred.await()
                 val readme = readmeDeferred.await()
                 val userProfile = userProfileDeferred.await()
                 val installedApp = installedAppDeferred.await()
 
                 if (rateLimited.get()) {
-                    _state.value = _state.value.copy(isLoading = false, errorMessage = null)
+                    // Any deferred tripping the rate-limit flag leaves the UI
+                    // in an incomplete state. Flag the releases section as
+                    // failed so it renders its FAILED card with a Retry
+                    // affordance instead of the misleading EMPTY card ("no
+                    // releases published yet") — the default would be EMPTY
+                    // because allReleases stays at its initial empty list.
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        errorMessage = null,
+                        releasesLoadFailed = true,
+                    )
                     return@launch
                 }
 
@@ -2064,6 +2132,8 @@ class DetailsViewModel(
                         errorMessage = null,
                         repository = repo,
                         allReleases = allReleases,
+                        releasesLoadFailed = releasesFailed,
+                        isRetryingReleases = false,
                         selectedRelease = selectedRelease,
                         selectedReleaseCategory = ReleaseCategory.STABLE,
                         stats = stats,

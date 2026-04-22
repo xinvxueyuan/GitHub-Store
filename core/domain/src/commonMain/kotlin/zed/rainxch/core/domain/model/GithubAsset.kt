@@ -9,6 +9,6 @@ data class GithubAsset(
     val contentType: String,
     val size: Long,
     val downloadUrl: String,
-    val uploader: GithubUser,
+    val uploader: GithubUser? = null,
     val downloadCount: Long = 0,
 )

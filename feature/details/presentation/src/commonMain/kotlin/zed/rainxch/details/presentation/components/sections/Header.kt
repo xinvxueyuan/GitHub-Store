@@ -28,6 +28,8 @@ import zed.rainxch.details.presentation.DetailsAction
 import zed.rainxch.details.presentation.DetailsState
 import zed.rainxch.details.presentation.components.AppHeader
 import zed.rainxch.details.presentation.components.ReleaseAssetsPicker
+import zed.rainxch.details.presentation.components.ReleasesStatus
+import zed.rainxch.details.presentation.components.ReleasesStatusCard
 import zed.rainxch.details.presentation.components.SmartInstallButton
 import zed.rainxch.details.presentation.components.VersionPicker
 import zed.rainxch.details.presentation.components.VersionTypePicker
@@ -67,59 +69,85 @@ fun LazyListScope.header(
         }
     }
 
-    // versions type list
-    if (state.allReleases.isNotEmpty()) {
+    // Status card replaces the pickers + install button in three cases:
+    //   1. releases fetch failed — show error + Retry
+    //   2. retry in flight — show spinner
+    //   3. repo truly has no releases — show "no releases published" empty state
+    // Initial page load (isLoading) is intentionally excluded — the top-level
+    // loading spinner covers it, no need to double up. Same for repository
+    // not loaded yet: the release-specific states only make sense once we
+    // know the repo exists (matches the VM's retryReleases() guard).
+    val releasesStatus: ReleasesStatus? =
+        when {
+            state.repository == null -> null
+            state.releasesLoadFailed -> ReleasesStatus.FAILED
+            state.isRetryingReleases -> ReleasesStatus.RETRYING
+            !state.isLoading && state.allReleases.isEmpty() -> ReleasesStatus.EMPTY
+            else -> null
+        }
+
+    if (releasesStatus != null) {
         item {
-            VersionTypePicker(
-                selectedCategory = state.selectedReleaseCategory,
-                onAction = onAction,
-                modifier = Modifier.fillMaxWidth().animateItem(),
+            ReleasesStatusCard(
+                status = releasesStatus,
+                onRetry = { onAction(DetailsAction.RetryReleases) },
+                modifier = Modifier.animateItem(),
             )
         }
-    }
-
-    // version and installable release
-    if (state.allReleases.isNotEmpty() || state.installableAssets.isNotEmpty()) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                ReleaseAssetsPicker(
-                    assetsList = state.installableAssets,
-                    selectedAsset = state.primaryAsset,
-                    isPickerVisible = state.isReleaseSelectorVisible,
-                    pinnedVariant = state.installedApp?.preferredAssetVariant,
+    } else {
+        // versions type list
+        if (state.allReleases.isNotEmpty()) {
+            item {
+                VersionTypePicker(
+                    selectedCategory = state.selectedReleaseCategory,
                     onAction = onAction,
-                    modifier = Modifier.weight(.65f),
-                )
-                VersionPicker(
-                    selectedRelease = state.selectedRelease,
-                    filteredReleases = state.filteredReleases,
-                    isPickerVisible = state.isVersionPickerVisible,
-                    onAction = onAction,
-                    modifier = Modifier.weight(.35f),
+                    modifier = Modifier.fillMaxWidth().animateItem(),
                 )
             }
         }
-    }
 
-    item {
-        val liquidState = LocalTopbarLiquidState.current
+        // version and installable release
+        if (state.allReleases.isNotEmpty() || state.installableAssets.isNotEmpty()) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ReleaseAssetsPicker(
+                        assetsList = state.installableAssets,
+                        selectedAsset = state.primaryAsset,
+                        isPickerVisible = state.isReleaseSelectorVisible,
+                        pinnedVariant = state.installedApp?.preferredAssetVariant,
+                        onAction = onAction,
+                        modifier = Modifier.weight(.65f),
+                    )
+                    VersionPicker(
+                        selectedRelease = state.selectedRelease,
+                        filteredReleases = state.filteredReleases,
+                        isPickerVisible = state.isVersionPickerVisible,
+                        onAction = onAction,
+                        modifier = Modifier.weight(.35f),
+                    )
+                }
+            }
+        }
 
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            SmartInstallButton(
-                isDownloading = state.isDownloading,
-                isInstalling = state.isInstalling,
-                isLiquidGlassEnabled = state.isLiquidGlassEnabled,
-                progress = state.downloadProgressPercent,
-                primaryAsset = state.primaryAsset,
-                state = state,
-                onAction = onAction,
-            )
+        item {
+            val liquidState = LocalTopbarLiquidState.current
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                SmartInstallButton(
+                    isDownloading = state.isDownloading,
+                    isInstalling = state.isInstalling,
+                    isLiquidGlassEnabled = state.isLiquidGlassEnabled,
+                    progress = state.downloadProgressPercent,
+                    primaryAsset = state.primaryAsset,
+                    state = state,
+                    onAction = onAction,
+                )
 
             DropdownMenu(
                 expanded = state.isInstallDropdownExpanded,
@@ -238,5 +266,6 @@ fun LazyListScope.header(
                 )
             }
         }
+    }
     }
 }

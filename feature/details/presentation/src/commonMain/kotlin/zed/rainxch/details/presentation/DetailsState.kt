@@ -27,6 +27,8 @@ data class DetailsState(
     // state for releases
     val selectedRelease: GithubRelease? = null,
     val allReleases: List<GithubRelease> = emptyList(),
+    val releasesLoadFailed: Boolean = false,
+    val isRetryingReleases: Boolean = false,
     val isReleaseSelectorVisible: Boolean = false,
     val selectedReleaseCategory: ReleaseCategory = ReleaseCategory.STABLE,
     val isVersionPickerVisible: Boolean = false,

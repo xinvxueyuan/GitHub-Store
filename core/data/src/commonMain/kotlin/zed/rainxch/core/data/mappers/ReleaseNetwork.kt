@@ -10,12 +10,14 @@ fun ReleaseNetwork.toDomain(): GithubRelease =
         tagName = tagName,
         name = name,
         author =
-            GithubUser(
-                id = author.id,
-                login = author.login,
-                avatarUrl = author.avatarUrl,
-                htmlUrl = author.htmlUrl,
-            ),
+            author?.let {
+                GithubUser(
+                    id = it.id,
+                    login = it.login,
+                    avatarUrl = it.avatarUrl,
+                    htmlUrl = it.htmlUrl,
+                )
+            },
         publishedAt = publishedAt ?: createdAt ?: "",
         description = body,
         assets = assets.map { it.toDomain() },

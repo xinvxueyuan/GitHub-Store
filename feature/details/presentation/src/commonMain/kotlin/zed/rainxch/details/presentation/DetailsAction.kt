@@ -9,6 +9,8 @@ import zed.rainxch.details.presentation.model.TranslationTarget
 sealed interface DetailsAction {
     data object Retry : DetailsAction
 
+    data object RetryReleases : DetailsAction
+
     data object InstallPrimary : DetailsAction
 
     data object OnDismissDowngradeWarning : DetailsAction
