@@ -37,6 +37,10 @@ fun main(args: Array<String>) {
     // `CrashReporter.resolveLogDir` for the per-OS path).
     CrashReporter.install()
 
+    // Guard the AWT EventDispatchThread against a known Compose MP 1.10.x NPE
+    // raised by the macOS accessibility bridge (see `A11yCrashGuard`).
+    A11yCrashGuard.install()
+
     // Reduce JVM DNS cache TTL so network changes (VPN on/off) are picked up quickly.
     // Default JVM caches positive lookups for 30s and negative lookups forever,
     // which breaks connectivity when a VPN changes DNS/routing mid-session.

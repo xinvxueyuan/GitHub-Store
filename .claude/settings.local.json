@@ -3,7 +3,13 @@
     "allow": [
       "Bash(grep -r \"\\\\.FLATPAK\\\\|Flatpak\\\\|flatpak\" . --include=*.kt)",
       "Bash(./gradlew *)",
-      "Bash(rtk find *)"
+      "Bash(rtk find *)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.jetbrains.com)",
+      "WebFetch(domain:youtrack.jetbrains.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:blog.jetbrains.com)"
     ]
   }
 }
