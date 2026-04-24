@@ -459,6 +459,17 @@
     <string name="select_version">Select version</string>
     <string name="pre_release_badge">Pre-release</string>
     <string name="latest_badge">Latest</string>
+
+    <!-- Pre-release channel UX (Details screen) -->
+    <string name="channel_chip_include_betas">Include betas</string>
+    <string name="channel_chip_stable_only">Stable only</string>
+    <string name="channel_toggle_cd">Toggle beta releases for this app</string>
+    <string name="action_switch_to_stable">Switch to stable %1$s</string>
+    <string name="stalled_project_warning_months">No stable release in %1$d months</string>
+    <string name="stalled_project_warning_days">No stable release in %1$d days</string>
+    <string name="stalled_project_warning_description">Active pre-releases but the project hasn\'t shipped a stable build in a while. Betas may not converge to a stable release.</string>
+    <string name="merged_whats_changed_title">What\'s changed since %1$s</string>
+    <string name="merged_release_heading">— %1$s —</string>
     <string name="no_version_selected">No version</string>
     <string name="versions_title">Versions</string>
     <string name="assets_title">Assets</string>

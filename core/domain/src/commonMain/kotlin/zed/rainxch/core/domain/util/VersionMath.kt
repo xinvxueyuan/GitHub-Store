@@ -219,6 +219,56 @@ object VersionMath {
         return PRE_RELEASE_MARKER_PATTERN.containsMatchIn(tag)
     }
 
+    /**
+     * Returns the canonical label for the first pre-release marker
+     * found in [tag], or `null` if none. Intended for UI badges that
+     * want to show "Beta" / "Alpha" / "RC" instead of a generic
+     * "Pre-release" pill — a much better signal for users deciding
+     * whether to install.
+     *
+     * Labels are returned in title-case regardless of how they were
+     * spelled in the tag (so `V1.0-BETA` and `v1.0-beta` both
+     * resolve to `"Beta"`).
+     *
+     * Mapping rules:
+     *  - `alpha`       → `Alpha`
+     *  - `beta`        → `Beta`
+     *  - `rc` / `rc\d+` → `RC`
+     *  - `preview`     → `Preview`
+     *  - `prerelease`  → `Pre-release`
+     *  - `snapshot`    → `Snapshot`
+     *  - `canary`      → `Canary`
+     *  - `nightly`     → `Nightly`
+     *  - `milestone` / `m\d+` → `Milestone`
+     *  - `ea`          → `Early Access`
+     *  - `dev`         → `Dev`
+     *  - `pre`         → `Pre`
+     *
+     * Callers that also want to treat the API `prerelease` flag as
+     * authoritative should use this alongside
+     * [zed.rainxch.core.domain.model.isEffectivelyPreRelease].
+     */
+    fun preReleaseMarkerLabel(tag: String?): String? {
+        if (tag.isNullOrBlank()) return null
+        val match = PRE_RELEASE_MARKER_PATTERN.find(tag) ?: return null
+        val raw = match.groupValues.getOrNull(1)?.lowercase().orEmpty()
+        return when {
+            raw.startsWith("alpha") -> "Alpha"
+            raw.startsWith("beta") -> "Beta"
+            raw.startsWith("rc") -> "RC"
+            raw == "preview" -> "Preview"
+            raw == "prerelease" -> "Pre-release"
+            raw == "snapshot" -> "Snapshot"
+            raw == "canary" -> "Canary"
+            raw == "nightly" -> "Nightly"
+            raw == "milestone" || raw.startsWith("m") -> "Milestone"
+            raw == "ea" -> "Early Access"
+            raw == "dev" -> "Dev"
+            raw == "pre" -> "Pre"
+            else -> null
+        }
+    }
+
     private val PRE_RELEASE_MARKER_PATTERN =
         // `\b` word boundaries cleanly separate markers from the
         // surrounding tag (so `alpha` matches `v1.0-alpha` but not

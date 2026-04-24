@@ -1,12 +1,14 @@
 package zed.rainxch.details.data.system
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
 import zed.rainxch.core.domain.model.ApkPackageInfo
 import zed.rainxch.core.domain.model.InstallSource
 import zed.rainxch.core.domain.model.InstalledApp
 import zed.rainxch.core.domain.repository.FavouritesRepository
 import zed.rainxch.core.domain.repository.InstalledAppsRepository
+import zed.rainxch.core.domain.repository.TweaksRepository
 import zed.rainxch.core.domain.system.Installer
 import zed.rainxch.core.domain.util.AssetVariant
 import zed.rainxch.details.domain.model.ApkValidationResult
@@ -21,6 +23,7 @@ class InstallationManagerImpl(
     private val installer: Installer,
     private val installedAppsRepository: InstalledAppsRepository,
     private val favouritesRepository: FavouritesRepository,
+    private val tweaksRepository: TweaksRepository,
     private val logger: GitHubStoreLogger,
 ) : InstallationManager {
     override suspend fun validateApk(
@@ -79,6 +82,15 @@ class InstallationManagerImpl(
             val pickedIndex = params.pickedAssetIndex?.takeIf { it >= 0 }
             val siblingCount = params.siblingAssetCount.takeIf { it > 0 }
 
+            // New apps inherit the global "include betas" preference
+            // so users who track betas across the board don't have to
+            // flip the per-app toggle for every install. Existing
+            // rows keep their own value; the global toggle is only
+            // consulted on creation.
+            val defaultIncludePreReleases =
+                runCatching { tweaksRepository.getIncludePreReleases().first() }
+                    .getOrDefault(false)
+
             val installedApp =
                 InstalledApp(
                     packageName = apkInfo.packageName,
@@ -117,6 +129,7 @@ class InstallationManagerImpl(
                     assetGlobPattern = fingerprint?.glob,
                     pickedAssetIndex = pickedIndex,
                     pickedAssetSiblingCount = siblingCount,
+                    includePreReleases = defaultIncludePreReleases,
                 )
 
             installedAppsRepository.saveInstalledApp(installedApp)

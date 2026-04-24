@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import zed.rainxch.core.domain.model.GithubRelease
 import zed.rainxch.core.domain.model.isEffectivelyPreRelease
+import zed.rainxch.core.domain.model.preReleaseLabel
 import zed.rainxch.details.presentation.DetailsAction
 import zed.rainxch.githubstore.core.presentation.res.Res
 import zed.rainxch.githubstore.core.presentation.res.latest_badge
@@ -222,12 +223,19 @@ private fun VersionListItem(
                     }
                 }
                 if (release.isEffectivelyPreRelease()) {
+                    // Prefer the specific marker ("Beta", "RC", "Alpha"…)
+                    // over the generic "Pre-release" pill — a stronger
+                    // signal for users deciding whether to install. Falls
+                    // back to the generic badge only when the API flag
+                    // marks a release as pre-release but no recognised
+                    // marker is in the tag or name.
+                    val specificLabel = release.preReleaseLabel()
                     Surface(
                         shape = RoundedCornerShape(4.dp),
                         color = MaterialTheme.colorScheme.tertiaryContainer,
                     ) {
                         Text(
-                            text = stringResource(Res.string.pre_release_badge),
+                            text = specificLabel ?: stringResource(Res.string.pre_release_badge),
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             color = MaterialTheme.colorScheme.onTertiaryContainer,
