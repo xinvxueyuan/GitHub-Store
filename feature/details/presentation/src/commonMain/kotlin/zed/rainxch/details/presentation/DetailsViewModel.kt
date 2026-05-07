@@ -127,6 +127,7 @@ class DetailsViewModel(
     private val externalImportRepository: ExternalImportRepository,
     private val apkInspector: ApkInspector,
     private val authenticationState: zed.rainxch.core.domain.repository.AuthenticationState,
+    private val systemInstallSerializer: zed.rainxch.core.domain.system.SystemInstallSerializer,
 ) : ViewModel() {
     private var hasLoadedInitialData = false
     private var currentDownloadJob: Job? = null
@@ -1461,6 +1462,8 @@ class DetailsViewModel(
         viewModelScope.launch {
             try {
                 val ext = warning.pendingAssetName.substringAfterLast('.', "").lowercase()
+                systemInstallSerializer.awaitFreeOrTimeout()
+                systemInstallSerializer.markPending(warning.pendingApkInfo?.packageName ?: "")
                 val installOutcome = installer.install(warning.pendingFilePath, ext)
 
                 if (platform == Platform.ANDROID) {
@@ -2075,6 +2078,8 @@ class DetailsViewModel(
             }
         }
 
+        systemInstallSerializer.awaitFreeOrTimeout()
+        systemInstallSerializer.markPending(validatedApkInfo?.packageName ?: "")
         val installOutcome = installer.install(filePath, ext)
 
         // Launch attestation check asynchronously (non-blocking)

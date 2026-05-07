@@ -59,6 +59,7 @@ val viewModelsModule =
                 externalImportRepository = get(),
                 apkInspector = get(),
                 authenticationState = get(),
+                systemInstallSerializer = get(),
             )
         }
         viewModelOf(::DeveloperProfileViewModel)

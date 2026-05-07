@@ -28,6 +28,7 @@ import zed.rainxch.core.domain.network.Downloader
 import zed.rainxch.core.domain.repository.InstalledAppsRepository
 import zed.rainxch.core.domain.repository.TweaksRepository
 import zed.rainxch.core.domain.system.Installer
+import zed.rainxch.core.domain.system.SystemInstallSerializer
 
 /**
  * Background worker that automatically downloads and silently installs
@@ -48,6 +49,7 @@ class AutoUpdateWorker(
     private val tweaksRepository: TweaksRepository by inject()
     private val shizukuServiceManager: ShizukuServiceManager by inject()
     private val dhizukuServiceManager: DhizukuServiceManager by inject()
+    private val systemInstallSerializer: SystemInstallSerializer by inject()
 
     override suspend fun doWork(): Result {
         return try {
@@ -214,8 +216,11 @@ class AutoUpdateWorker(
         val installerLabel = tweaksRepository.getInstallerType().first().name
         Logger.d { "AutoUpdateWorker: Installing ${app.appName} via $installerLabel" }
         try {
+            systemInstallSerializer.awaitFreeOrTimeout()
+            systemInstallSerializer.markPending(app.packageName)
             installer.install(filePath, ext)
         } catch (e: Exception) {
+            systemInstallSerializer.markCompleted(app.packageName)
             installedAppsRepository.updatePendingStatus(app.packageName, false)
             throw e
         }

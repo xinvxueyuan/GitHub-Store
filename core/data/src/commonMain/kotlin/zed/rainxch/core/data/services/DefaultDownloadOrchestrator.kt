@@ -27,6 +27,7 @@ import zed.rainxch.core.domain.system.Installer
 import zed.rainxch.core.domain.system.MultiSourceDownloader
 import zed.rainxch.core.domain.system.OrchestratedDownload
 import zed.rainxch.core.domain.system.PendingInstallNotifier
+import zed.rainxch.core.domain.system.SystemInstallSerializer
 import zed.rainxch.core.domain.util.AssetFileName
 import kotlin.random.Random
 
@@ -81,6 +82,7 @@ class DefaultDownloadOrchestrator(
     private val pendingInstallNotifier: PendingInstallNotifier,
     private val slowDownloadDetector: SlowDownloadDetector,
     private val appScope: CoroutineScope,
+    private val systemInstallSerializer: SystemInstallSerializer,
 ) : DownloadOrchestrator {
     private companion object {
         private const val DEFAULT_MAX_CONCURRENT = 3
@@ -310,6 +312,8 @@ class DefaultDownloadOrchestrator(
         val ext = spec.asset.name.substringAfterLast('.', "").lowercase()
         try {
             installer.ensurePermissionsOrThrow(ext)
+            systemInstallSerializer.awaitFreeOrTimeout()
+            systemInstallSerializer.markPending(spec.packageName)
             val outcome = installer.install(filePath, ext)
             when (outcome) {
                 InstallOutcome.COMPLETED -> {
@@ -547,6 +551,8 @@ class DefaultDownloadOrchestrator(
         updateEntry(packageName) { it.copy(stage = DownloadStage.Installing) }
         return try {
             installer.ensurePermissionsOrThrow(ext)
+            systemInstallSerializer.awaitFreeOrTimeout()
+            systemInstallSerializer.markPending(packageName)
             val outcome = installer.install(filePath, ext)
             if (outcome == InstallOutcome.COMPLETED) {
                 try {

@@ -41,6 +41,7 @@ import zed.rainxch.core.domain.system.DownloadSpec
 import zed.rainxch.core.domain.system.DownloadStage as OrchestratorStage
 import zed.rainxch.core.domain.system.InstallPolicy
 import zed.rainxch.core.domain.system.Installer
+import zed.rainxch.core.domain.system.SystemInstallSerializer
 import zed.rainxch.core.domain.use_cases.SyncInstalledAppsUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
@@ -61,6 +62,7 @@ class AppsViewModel(
     private val tweaksRepository: TweaksRepository,
     private val downloadOrchestrator: DownloadOrchestrator,
     private val externalImportRepository: ExternalImportRepository,
+    private val systemInstallSerializer: SystemInstallSerializer,
 ) : ViewModel() {
     companion object {
         private const val BANNER_THRESHOLD = 1
@@ -1105,8 +1107,11 @@ class AppsViewModel(
                     updateAppState(app.packageName, UpdateState.Installing)
 
                     try {
+                        systemInstallSerializer.awaitFreeOrTimeout()
+                        systemInstallSerializer.markPending(app.packageName)
                         installer.install(filePath, ext)
                     } catch (e: Exception) {
+                        systemInstallSerializer.markCompleted(app.packageName)
                         installedAppsRepository.updatePendingStatus(app.packageName, false)
                         throw e
                     }
