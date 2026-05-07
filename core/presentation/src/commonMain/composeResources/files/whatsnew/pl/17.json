@@ -14,7 +14,8 @@
       "type": "FIXED",
       "bullets": [
         "Aplikacje odinstalowane przez ustawienia systemu znikają teraz natychmiast z listy śledzonych.",
-        "Lepsze wykrywanie wersji — wydania o tym samym numerze, ale z różnymi metadanymi build, nie są już błędnie oznaczane jako 'już zainstalowane'."
+        "Lepsze wykrywanie wersji — wydania o tym samym numerze, ale z różnymi metadanymi build, nie są już błędnie oznaczane jako 'już zainstalowane'.",
+        "Aktualizowanie wielu aplikacji po kolei działa teraz niezawodnie — instalacje są szeregowane, więc okno dialogowe systemu nie pokazuje już poprzedniego APK. Wersje na ekranie aplikacji również są aktualizowane po każdej instalacji."
       ]
     }
   ]

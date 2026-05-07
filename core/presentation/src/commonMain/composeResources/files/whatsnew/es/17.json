@@ -14,7 +14,8 @@
       "type": "FIXED",
       "bullets": [
         "Las apps desinstaladas desde Ajustes del sistema ahora desaparecen al instante de la lista de seguimiento.",
-        "Mejor detección de versiones — las releases que comparten número pero llevan metadatos de build distintos ya no se marcan por error como 'ya instaladas'."
+        "Mejor detección de versiones — las releases que comparten número pero llevan metadatos de build distintos ya no se marcan por error como 'ya instaladas'.",
+        "Actualizar varias apps seguidas ahora funciona bien — las instalaciones se serializan para que cada diálogo del sistema muestre el APK correcto. Las versiones en la pantalla de apps también se mantienen al día tras cada instalación."
       ]
     }
   ]
