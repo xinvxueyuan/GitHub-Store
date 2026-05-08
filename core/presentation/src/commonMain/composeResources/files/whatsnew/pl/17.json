@@ -17,6 +17,12 @@
         "Lepsze wykrywanie wersji — wydania o tym samym numerze, ale z różnymi metadanymi build, nie są już błędnie oznaczane jako 'już zainstalowane'.",
         "Aktualizowanie wielu aplikacji po kolei działa teraz niezawodnie — instalacje są szeregowane, więc okno dialogowe systemu nie pokazuje już poprzedniego APK. Wersje na ekranie aplikacji również są aktualizowane po każdej instalacji."
       ]
+    },
+    {
+      "type": "IMPROVED",
+      "bullets": [
+        "Bardziej niezawodne aktualizacje w tle na Oppo, OnePlus, Realme, Xiaomi, vivo i Honor — Ustawienia oferują teraz skrót do wyłączenia optymalizacji baterii w jednym kliknięciu, a zadania aktualizacji działają z przyspieszonym priorytetem."
+      ]
     }
   ]
 }

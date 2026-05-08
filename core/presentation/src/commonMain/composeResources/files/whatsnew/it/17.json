@@ -17,6 +17,12 @@
         "Riconoscimento versioni più preciso — le release con lo stesso numero ma metadati di build diversi non vengono più erroneamente segnalate come 'già installate'.",
         "Aggiornare più app di fila ora funziona in modo affidabile — le installazioni vengono serializzate, così ogni finestra di sistema mostra l'APK giusto. Anche le versioni nella schermata App restano aggiornate dopo ogni installazione."
       ]
+    },
+    {
+      "type": "IMPROVED",
+      "bullets": [
+        "Aggiornamenti in background più affidabili su Oppo, OnePlus, Realme, Xiaomi, vivo e Honor — le Impostazioni offrono ora una scorciatoia in un tocco per l'esenzione dall'ottimizzazione della batteria, e i job di aggiornamento girano con priorità accelerata."
+      ]
     }
   ]
 }

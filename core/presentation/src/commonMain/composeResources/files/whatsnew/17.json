@@ -17,6 +17,12 @@
         "Better version detection — releases that share a numeric version but ship distinct build artifacts are no longer falsely flagged as 'already installed'.",
         "Updating multiple apps in a row now works reliably — installs serialize so each one shows the correct APK in the system dialog. Apps screen versions also stay in sync after every install."
       ]
+    },
+    {
+      "type": "IMPROVED",
+      "bullets": [
+        "More reliable background updates on Oppo, OnePlus, Realme, Xiaomi, vivo, and Honor — Tweaks now offers a one-tap battery-optimization shortcut and update workers run with expedited priority."
+      ]
     }
   ]
 }

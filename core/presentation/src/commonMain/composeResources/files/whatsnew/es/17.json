@@ -17,6 +17,12 @@
         "Mejor detección de versiones — las releases que comparten número pero llevan metadatos de build distintos ya no se marcan por error como 'ya instaladas'.",
         "Actualizar varias apps seguidas ahora funciona bien — las instalaciones se serializan para que cada diálogo del sistema muestre el APK correcto. Las versiones en la pantalla de apps también se mantienen al día tras cada instalación."
       ]
+    },
+    {
+      "type": "IMPROVED",
+      "bullets": [
+        "Actualizaciones en segundo plano más fiables en Oppo, OnePlus, Realme, Xiaomi, vivo y Honor — Ajustes ofrece ahora un acceso directo a la exclusión de optimización de batería, y las comprobaciones de actualización se ejecutan con prioridad acelerada."
+      ]
     }
   ]
 }
