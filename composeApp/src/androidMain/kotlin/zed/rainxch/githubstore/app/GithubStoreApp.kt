@@ -32,13 +32,37 @@ class GithubStoreApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Synchronous: Koin must be ready before the first composition can
+        // resolve any singleton; everything else can run on the app scope.
         initKoin {
             androidContext(this@GithubStoreApp)
         }
 
-        createNotificationChannels()
-        registerPackageEventReceiver()
-        startDownloadNotificationObserver()
+        // Deferred to the app scope so they don't block the first frame.
+        // Each step gets its own launch + runCatching so a failure in one
+        // (NotificationManager hiccup, broadcast-registration race, etc.)
+        // doesn't abort the others — matches the pattern used by the
+        // other startup blocks below.
+        //  - notification channels are only consumed when a worker posts
+        //    a notification (minutes later at the earliest)
+        //  - dynamic PackageEventReceiver is the in-process fast path; the
+        //    manifest-registered receiver still catches broadcasts during
+        //    the millisecond gap until the dynamic registration lands
+        //  - the download notification observer has nothing to observe
+        //    until the user starts a download
+        appScope.launch {
+            runCatching { createNotificationChannels() }
+                .onFailure { Logger.w(it) { "Notification-channel creation failed" } }
+        }
+        appScope.launch {
+            runCatching { registerPackageEventReceiver() }
+                .onFailure { Logger.w(it) { "Dynamic PackageEventReceiver registration failed" } }
+        }
+        appScope.launch {
+            runCatching { startDownloadNotificationObserver() }
+                .onFailure { Logger.w(it) { "Download notification observer start failed" } }
+        }
+
         scheduleBackgroundUpdateChecks()
         registerSelfAsInstalledApp()
         scheduleInitialExternalScan()
