@@ -62,11 +62,19 @@ object VersionMath {
         // parsed independently. Only inserts before known markers to
         // avoid mauling architecture suffixes like `1arm64`.
         val separated = insertHyphenBeforeKnownMarker(calverNormalized)
-        if (parseSemanticVersion(separated) != null) {
-            return separated
+        // Build-variant suffix (`-f`, `-m`, `-arm64`, `-stable`, …) —
+        // some maintainers append a flavour marker to the installed
+        // versionName but tag GitHub with the bare semver core, so the
+        // exact same artefact reads as `1.8.6-f` on-device but `1.8.6`
+        // in the release feed. Strip these flavour markers so the
+        // comparator doesn't perpetually report a phantom update.
+        // Pre-release markers (`-beta`, `-rc1`, …) are preserved.
+        val deflavoured = stripBuildVariantSuffix(separated)
+        if (parseSemanticVersion(deflavoured) != null) {
+            return deflavoured
         }
-        val match = DOTTED_DIGIT_PATTERN.find(separated)
-        return match?.value ?: separated
+        val match = DOTTED_DIGIT_PATTERN.find(deflavoured)
+        return match?.value ?: deflavoured
     }
 
     private fun stripFullPrefix(version: String): String {
@@ -93,6 +101,81 @@ object VersionMath {
         val core = "$year.$month.$day"
         return if (tail.isNotEmpty()) "$core-$tail" else core
     }
+
+    /**
+     * Strip a curated set of build-variant / flavour markers that
+     * routinely appear in installed `versionName`s but never in the
+     * GitHub release tag (the maintainer ships a single `1.8.6` tag
+     * but emits `1.8.6-f`, `1.8.6-m` APKs). Without this step the
+     * comparator reads the suffix as a semver pre-release identifier,
+     * ranks the bare tag higher, and surfaces a phantom update.
+     *
+     * Recognised markers (case-insensitive, before any `.` separator
+     * inside the pre-release segment):
+     *  - **Build flavour**: `f` / `full`, `m` / `mini` / `minified`,
+     *    `l` / `lite`, `r` / `release`, `d` / `debug`, `x` / `extended`.
+     *  - **Channel**: `stable`, `final`, `prod`, `production`, `gms`,
+     *    `fdroid`, `github`, `store`.
+     *  - **Architecture**: `armv7`, `armv8`, `arm64`, `armeabi`, `x86`,
+     *    `x64`, `x86_64`, `universal`, `android`, `ios`.
+     *
+     * Intentionally NOT stripped (these are real pre-release markers):
+     *  - `alpha`, `beta`, `rc`, `preview`, `prerelease`, `snapshot`,
+     *    `canary`, `nightly`, `milestone`, `ea`, `dev`, `pre`, `m\d+`.
+     *
+     * The function only acts when [version] parses as semver; if the
+     * input lacks a recognisable numeric core there's nothing to anchor
+     * a "core + flavour" split to and we leave the string alone.
+     *
+     * Examples:
+     *   `1.8.6-f`        → `1.8.6`     (full APK)
+     *   `1.8.6-m`        → `1.8.6`     (minified APK)
+     *   `1.8.6-arm64`    → `1.8.6`     (architecture)
+     *   `1.8.6-stable`   → `1.8.6`     (channel)
+     *   `1.8.6-b`        → `1.8.6-b`   (untouched: `b` could be beta)
+     *   `1.8.6-beta`     → `1.8.6-beta` (real pre-release)
+     *   `1.8.6-rc.1`     → `1.8.6-rc.1` (real pre-release)
+     */
+    private fun stripBuildVariantSuffix(version: String): String {
+        val parsed = parseSemanticVersion(version) ?: return version
+        val pre = parsed.preRelease ?: return version
+        if (!isBuildVariantMarker(pre)) return version
+        return parsed.numbers.joinToString(".")
+    }
+
+    private fun isBuildVariantMarker(preRelease: String): Boolean {
+        if (preRelease.isEmpty()) return false
+        // Compound pre-release identifiers (`armv7-beta`, `rc.1`) are
+        // ambiguous: even if the first token looks like a build flavour,
+        // a downstream segment may signal a real pre-release. Bail and
+        // keep the suffix intact rather than risk silently swallowing
+        // pre-release intent.
+        if (preRelease.contains('.') || preRelease.contains('-')) return false
+        val token = preRelease.lowercase()
+        // Real pre-release markers always win — don't strip something
+        // that semver/users treat as a pre-release identifier.
+        if (KNOWN_PRE_RELEASE_PREFIXES.any { token.startsWith(it) }) {
+            return false
+        }
+        if (M_DIGIT_TAIL_PATTERN.containsMatchIn(token)) return false
+        return BUILD_VARIANT_LITERALS.contains(token)
+    }
+
+    private val BUILD_VARIANT_LITERALS =
+        setOf(
+            // Build flavours (single-letter)
+            "f", "m", "l", "r", "d", "x",
+            // Build flavours (words)
+            "full", "mini", "minified", "lite", "release", "debug",
+            "extended",
+            // Distribution channel
+            "stable", "final", "prod", "production",
+            "gms", "fdroid", "github", "store",
+            // Architecture
+            "armv7", "armv8", "arm64", "armeabi",
+            "x86", "x64", "x86_64", "universal",
+            "android", "ios",
+        )
 
     private fun insertHyphenBeforeKnownMarker(s: String): String {
         val match = ADJACENT_ALPHA_PATTERN.find(s) ?: return s
