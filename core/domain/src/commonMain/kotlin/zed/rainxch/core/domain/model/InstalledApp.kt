@@ -112,6 +112,14 @@ data class InstalledApp(
      * with [pendingInstallVersion] for the Details-screen match.
      */
     val pendingInstallAssetName: String? = null,
+    /**
+     * Release tag the user explicitly skipped via the apps row "Skip
+     * this version" action. While non-null, the periodic update check
+     * suppresses the badge for [packageName] when the matched release
+     * tag equals this value. Auto-clears the moment a strictly newer
+     * release lands so the user gets re-notified next cycle.
+     */
+    val skippedReleaseTag: String? = null,
 )
 
 /**

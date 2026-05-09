@@ -153,4 +153,18 @@ data class InstalledAppEntity(
      * Details-screen "ready to install" detection.
      */
     val pendingInstallAssetName: String? = null,
+    /**
+     * Tag of an upstream release the user has chosen to ignore. Set when
+     * the user taps "Skip this version" on the apps row. While non-null
+     * and equal to the matched release tag, [checkForUpdates] suppresses
+     * the update badge for [packageName]. The flag auto-clears the
+     * moment a strictly newer release lands so the user gets re-notified
+     * the next cycle without having to unskip manually.
+     *
+     * `@ColumnInfo(defaultValue = "NULL")` matches `MIGRATION_15_16` so
+     * Room's schema validator doesn't flag a mismatch between the
+     * migrated table and the freshly-created one.
+     */
+    @ColumnInfo(defaultValue = "NULL")
+    val skippedReleaseTag: String? = null,
 )

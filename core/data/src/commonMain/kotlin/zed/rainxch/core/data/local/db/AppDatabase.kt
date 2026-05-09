@@ -33,7 +33,7 @@ import zed.rainxch.core.data.local.db.entities.UpdateHistoryEntity
         ExternalLinkEntity::class,
         SigningFingerprintEntity::class,
     ],
-    version = 15,
+    version = 16,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
