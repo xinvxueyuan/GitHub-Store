@@ -556,7 +556,12 @@ class DetailsViewModel(
     }
 
     private fun acknowledgeChannelChipCoachmark() {
-        if (!_state.value.isChannelChipCoachmarkPending) return
+        // Persist unconditionally — `state.update` with the same value is a
+        // no-op, and `setChannelChipCoachmarkShown(true)` is idempotent.
+        // Skipping persistence when in-memory `pending` is already false
+        // (e.g., toggle + dismiss race) leaves the DataStore flag at false
+        // if the very first persist failed, so the coachmark would
+        // re-appear on next launch.
         _state.update { it.copy(isChannelChipCoachmarkPending = false) }
         viewModelScope.launch {
             runCatching { tweaksRepository.setChannelChipCoachmarkShown(true) }
