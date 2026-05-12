@@ -152,6 +152,7 @@ fun RepositoryCard(
                             maxLines = 1,
                             softWrap = false,
                             overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
                         )
 
                         if (discoveryRepositoryUi.isCurrentUserOwner) {
