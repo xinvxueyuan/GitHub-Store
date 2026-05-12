@@ -444,6 +444,9 @@ private fun MainState(
                     onShareClick = {
                         onAction(HomeAction.OnShareClick(discoveryRepository.repository))
                     },
+                    onHideClick = {
+                        onAction(HomeAction.OnHideRepository(discoveryRepository.repository))
+                    },
                     modifier = Modifier.animateItem(),
                 )
             }

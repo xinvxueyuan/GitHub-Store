@@ -26,6 +26,7 @@ import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.hasActualUpdate
 import zed.rainxch.core.domain.model.isReallyInstalled
 import zed.rainxch.core.domain.repository.FavouritesRepository
+import zed.rainxch.core.domain.repository.HiddenReposRepository
 import zed.rainxch.core.domain.repository.InstalledAppsRepository
 import zed.rainxch.core.domain.repository.SeenReposRepository
 import zed.rainxch.core.domain.repository.StarredRepository
@@ -52,6 +53,7 @@ class HomeViewModel(
     private val shareManager: ShareManager,
     private val tweaksRepository: TweaksRepository,
     private val seenReposRepository: SeenReposRepository,
+    private val hiddenReposRepository: HiddenReposRepository,
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
     private var hasLoadedInitialData = false
@@ -79,6 +81,7 @@ class HomeViewModel(
                     observeFavourites()
                     observeStarredRepos()
                     observeSeenRepos()
+                    observeHiddenRepos()
                     observeDiscoveryPlatforms()
                     observeHideSeenEnabled()
 
@@ -374,9 +377,10 @@ class HomeViewModel(
                 .associateBy { it.repoId }
 
         val seenIds = _state.value.seenRepoIds
+        val hiddenIds = _state.value.hiddenRepoIds
         val currentLogin = currentUserLogin
 
-        return repos.map { repo ->
+        return repos.filter { it.id !in hiddenIds }.map { repo ->
             val apps = installedAppsMap[repo.id].orEmpty()
             val favourite = favoritesMap[repo.id]
             val starred = starredReposMap[repo.id]
@@ -520,6 +524,24 @@ class HomeViewModel(
                 // Handled in composable
             }
 
+            is HomeAction.OnHideRepository -> {
+                val repo = action.repo
+                viewModelScope.launch {
+                    hiddenReposRepository.hide(
+                        repoId = repo.id,
+                        repoName = repo.name,
+                        repoOwner = repo.owner.login,
+                        repoOwnerAvatarUrl = repo.owner.avatarUrl,
+                    )
+                }
+            }
+
+            is HomeAction.OnUndoHideRepository -> {
+                viewModelScope.launch {
+                    hiddenReposRepository.unhide(action.repoId)
+                }
+            }
+
             HomeAction.OnSearchClick -> {
                 // Handled in composable
             }
@@ -576,6 +598,25 @@ class HomeViewModel(
                                 .map { repo ->
                                     repo.copy(isSeen = repo.repository.id in ids)
                                 }.toImmutableList(),
+                    )
+                }
+            }
+        }
+    }
+
+    private fun observeHiddenRepos() {
+        viewModelScope.launch {
+            hiddenReposRepository.getAllHiddenRepoIds().collect { ids ->
+                _state.update { current ->
+                    current.copy(
+                        hiddenRepoIds = ids,
+                        // Drop already-loaded repos that are now hidden so
+                        // the grid reacts immediately to a hide action
+                        // without waiting for the next pagination tick.
+                        repos =
+                            current.repos
+                                .filter { it.repository.id !in ids }
+                                .toImmutableList(),
                     )
                 }
             }

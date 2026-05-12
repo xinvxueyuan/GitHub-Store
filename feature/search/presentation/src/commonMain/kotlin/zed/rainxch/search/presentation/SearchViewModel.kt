@@ -24,6 +24,7 @@ import zed.rainxch.core.domain.model.RateLimitException
 import zed.rainxch.core.domain.model.hasActualUpdate
 import zed.rainxch.core.domain.model.isReallyInstalled
 import zed.rainxch.core.domain.repository.FavouritesRepository
+import zed.rainxch.core.domain.repository.HiddenReposRepository
 import zed.rainxch.core.domain.repository.InstalledAppsRepository
 import zed.rainxch.core.domain.repository.SearchHistoryRepository
 import zed.rainxch.core.domain.repository.SeenReposRepository
@@ -65,6 +66,7 @@ class SearchViewModel(
     private val searchHistoryRepository: SearchHistoryRepository,
     private val telemetryRepository: TelemetryRepository,
     private val profileRepository: ProfileRepository,
+    private val hiddenReposRepository: HiddenReposRepository,
 ) : ViewModel() {
     private var hasLoadedInitialData = false
     private var currentSearchJob: Job? = null
@@ -100,6 +102,7 @@ class SearchViewModel(
                     observeFavouriteApps()
                     observeStarredRepos()
                     observeSeenRepos()
+                    observeHiddenRepos()
                     observeHideSeenEnabled()
                     observeClipboardSetting()
                     observeSearchHistory()
@@ -115,12 +118,17 @@ class SearchViewModel(
                 initialValue = SearchState(),
             )
 
-    private fun computeVisibleRepos(state: SearchState): ImmutableList<DiscoveryRepositoryUi> =
-        if (state.isHideSeenEnabled && state.seenRepoIds.isNotEmpty()) {
-            state.repositories.filter { it.repository.id !in state.seenRepoIds }.toImmutableList()
-        } else {
-            state.repositories
-        }
+    private fun computeVisibleRepos(state: SearchState): ImmutableList<DiscoveryRepositoryUi> {
+        val hidden = state.hiddenRepoIds
+        val needsHideSeenFilter = state.isHideSeenEnabled && state.seenRepoIds.isNotEmpty()
+        if (hidden.isEmpty() && !needsHideSeenFilter) return state.repositories
+        return state.repositories
+            .filter { repo ->
+                repo.repository.id !in hidden &&
+                    (!needsHideSeenFilter || repo.repository.id !in state.seenRepoIds)
+            }
+            .toImmutableList()
+    }
 
     private fun observeSeenRepos() {
         viewModelScope.launch {
@@ -143,6 +151,24 @@ class SearchViewModel(
         viewModelScope.launch {
             tweaksRepository.getHideSeenEnabled().collect { enabled ->
                 _state.update { it.copy(isHideSeenEnabled = enabled) }
+            }
+        }
+    }
+
+    private fun observeHiddenRepos() {
+        viewModelScope.launch {
+            hiddenReposRepository.getAllHiddenRepoIds().collect { ids ->
+                _state.update { current ->
+                    current.copy(
+                        hiddenRepoIds = ids,
+                        // Drop already-loaded repos that are now hidden so
+                        // the grid reacts immediately to a hide action.
+                        repositories =
+                            current.repositories
+                                .filter { it.repository.id !in ids }
+                                .toImmutableList(),
+                    )
+                }
             }
         }
     }
@@ -721,6 +747,24 @@ class SearchViewModel(
             SearchAction.OnDisableHideSeenForResults -> {
                 viewModelScope.launch {
                     tweaksRepository.setHideSeenEnabled(false)
+                }
+            }
+
+            is SearchAction.OnHideRepository -> {
+                val repo = action.repo
+                viewModelScope.launch {
+                    hiddenReposRepository.hide(
+                        repoId = repo.id,
+                        repoName = repo.name,
+                        repoOwner = repo.owner.login,
+                        repoOwnerAvatarUrl = repo.owner.avatarUrl,
+                    )
+                }
+            }
+
+            is SearchAction.OnUndoHideRepository -> {
+                viewModelScope.launch {
+                    hiddenReposRepository.unhide(action.repoId)
                 }
             }
         }
