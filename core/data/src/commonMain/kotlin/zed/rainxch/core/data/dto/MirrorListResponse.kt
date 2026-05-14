@@ -18,4 +18,5 @@ data class MirrorEntry(
     @SerialName("status") val status: String,
     @SerialName("latency_ms") val latencyMs: Int? = null,
     @SerialName("last_checked_at") val lastCheckedAt: String? = null,
+    @SerialName("traffic_kinds") val trafficKinds: List<String>? = null,
 )

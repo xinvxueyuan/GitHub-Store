@@ -23,6 +23,7 @@ import zed.rainxch.core.domain.model.MirrorConfig
 import zed.rainxch.core.domain.model.MirrorPreference
 import zed.rainxch.core.domain.model.MirrorStatus
 import zed.rainxch.core.domain.model.MirrorType
+import zed.rainxch.core.domain.model.TrafficKind
 import zed.rainxch.core.domain.repository.MirrorRemoved
 import zed.rainxch.core.domain.repository.MirrorRepository
 
@@ -162,5 +163,14 @@ class MirrorRepositoryImpl(
                 },
             latencyMs = latencyMs,
             lastCheckedAt = lastCheckedAt?.let { runCatching { Instant.parse(it) }.getOrNull() },
+            // Pre-1.8.3 backend responses don't ship this field. Default keeps the
+            // legacy assumption that every mirror handles both traffic kinds, so
+            // older entries stay routable as before.
+            trafficKinds =
+                trafficKinds
+                    ?.mapNotNull { TrafficKind.fromWire(it) }
+                    ?.toSet()
+                    ?.ifEmpty { null }
+                    ?: setOf(TrafficKind.RELEASE_ASSET, TrafficKind.RAW_FILE),
         )
 }

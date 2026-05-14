@@ -10,4 +10,5 @@ data class MirrorConfig(
     val status: MirrorStatus,
     val latencyMs: Int?,
     val lastCheckedAt: Instant?,
+    val trafficKinds: Set<TrafficKind> = setOf(TrafficKind.RELEASE_ASSET, TrafficKind.RAW_FILE),
 )
