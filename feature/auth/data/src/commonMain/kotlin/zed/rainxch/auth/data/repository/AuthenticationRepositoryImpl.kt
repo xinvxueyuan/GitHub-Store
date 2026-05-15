@@ -48,23 +48,32 @@ class AuthenticationRepositoryImpl(
 
             try {
                 val dto = GitHubAuthApi.startDeviceFlowViaBackend(BACKEND_ORIGIN)
-                logger.debug("✅ Device flow started via Backend. User code: ${dto.userCode}")
+                logger.info("Device flow started via Backend. userCode=${dto.userCode} interval=${dto.intervalSec}s expires=${dto.expiresInSec}s completeUri=${dto.verificationUriComplete != null}")
                 DeviceFlowStart(dto.toDomain(), AuthPath.Backend)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
-                if (e.isAuthInfrastructureError()) {
-                    logger.debug(
-                        "Backend device/start failed (${e::class.simpleName}: ${e.message}) — falling back to Direct",
+                val backendClass = e::class.simpleName ?: "Throwable"
+                val backendMsg = e.message ?: "<no message>"
+                val backendStatus = (e as? BackendHttpException)?.statusCode
+                if (e.isBackendStartFallbackEligible()) {
+                    logger.warn(
+                        "Backend device/start failed → falling back to Direct. " +
+                            "class=$backendClass status=$backendStatus origin=$BACKEND_ORIGIN msg=$backendMsg",
                     )
                     try {
                         val dto = GitHubAuthApi.startDeviceFlowDirect(clientId)
-                        logger.debug("✅ Device flow started via Direct. User code: ${dto.userCode}")
+                        logger.info("Device flow started via Direct fallback. userCode=${dto.userCode}")
                         DeviceFlowStart(dto.toDomain(), AuthPath.Direct)
                     } catch (inner: CancellationException) {
                         throw inner
                     } catch (inner: Throwable) {
-                        logger.debug("❌ Direct device/start also failed: ${inner.message}")
+                        val innerClass = inner::class.simpleName ?: "Throwable"
+                        val innerMsg = inner.message ?: "<no message>"
+                        logger.error(
+                            "Direct device/start ALSO failed. backendClass=$backendClass backendStatus=$backendStatus backendMsg=$backendMsg | directClass=$innerClass directMsg=$innerMsg",
+                            inner,
+                        )
                         throw Exception(
                             "Failed to start GitHub authentication. " +
                                 "Please check your internet connection and try again.",
@@ -72,7 +81,11 @@ class AuthenticationRepositoryImpl(
                         )
                     }
                 } else {
-                    logger.debug("❌ Backend device/start returned non-infra error: ${e.message}")
+                    logger.error(
+                        "Backend device/start non-infra failure (no fallback). " +
+                            "class=$backendClass status=$backendStatus origin=$BACKEND_ORIGIN msg=$backendMsg",
+                        e,
+                    )
                     throw Exception(
                         "Failed to start GitHub authentication. " +
                             "Please check your internet connection and try again.",
@@ -424,6 +437,11 @@ class AuthenticationRepositoryImpl(
             is BackendHttpException -> statusCode in 500..599
             else -> isNetworkError((message ?: "").lowercase())
         }
+
+    private fun Throwable.isBackendStartFallbackEligible(): Boolean {
+        if (isAuthInfrastructureError()) return true
+        return this is BackendHttpException && statusCode == 429
+    }
 
     private fun isNetworkError(errorMsg: String): Boolean =
         errorMsg.contains("unable to resolve") ||
