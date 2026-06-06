@@ -31,30 +31,32 @@ flatpak install flathub org.freedesktop.Sdk.Extension.openjdk21//24.08
 
 ## Setup (One-Time)
 
-### 1. Generate Gradle dependency sources
+### 1. Generate the offline dependency sources
 
-Flatpak builds run without network access, so all Maven/Gradle dependencies must
-be pre-downloaded and listed in a JSON manifest.
-
-Add the plugin to your root `build.gradle.kts`:
-
-```kotlin
-plugins {
-    id("io.github.jwharm.flatpak-gradle-generator") version "1.7.0"
-}
-```
-
-Then generate the sources file:
+Offline builds need every Maven/Gradle artifact pre-pinned. There are **two**
+source files, each from a different generator — they cover what the other can't:
 
 ```bash
-./gradlew flatpakGradleGenerator --no-configuration-cache
+# a) project deps -> flatpak-sources.json
+rm -rf ~/.gradle/caches                                                     # avoid pinning stale versions
+./gradlew :composeApp:packageUberJarForCurrentOS --no-configuration-cache   # populate cache
+python3 packaging/flatpak/generate-all-sources.py                           # scan cache + auto-verify
+
+# b) build-logic classpath -> flatpak-sources-convention.json
+./gradlew -p build-logic :convention:flatpakGradleGenerator --no-configuration-cache
+python3 packaging/flatpak/verify-sources.py packaging/flatpak/flatpak-sources-convention.json
 ```
 
-This creates `flatpak-sources.json` in the project root. Move it to this directory:
+Why two: the root `flatpakGradleGenerator` plugin under-captures the KMP
+multiplatform graph, so the project half uses the cache-scanning
+`generate-all-sources.py`. build-logic is a plain JVM build, so its **own** plugin
+task captures its classpath correctly — including buildscript transitives like
+`gson` that the project cache-scan never sees (and it downloads the jars while
+resolving). The manifest lists both files.
 
-```bash
-mv flatpak-sources.json packaging/flatpak/
-```
+Never commit a sources file that fails `verify-sources.py` — every pinned URL
+must serve its recorded sha512. `generate-all-sources.py` runs that check
+automatically and aborts on any mismatch.
 
 ### 2. Verify SHA256 hashes
 
